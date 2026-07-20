@@ -298,59 +298,61 @@ ipcMain.handle("check-online", async (event, target) => {
 });
 
 //Save Json File
-ipcMain.handle("save-server", async (_, server) => {
+ipcMain.handle("save-server", async (event, server) => {
+    try {
+        const serversPath = getServersPath();
+        const fileContent = fs.readFileSync(serversPath, "utf8");
+        const servers = JSON.parse(fileContent || "[]");
 
-    try{
-
-        const file = path.join(__dirname, "config", "servers.json");
-
-        const data = JSON.parse(fs.readFileSync(file, "utf8"));
-
-        data.servers.push(server);
+        servers.push(server);
 
         fs.writeFileSync(
-            file,
-            JSON.stringify(data, null, 4),
+            serversPath,
+            JSON.stringify(servers, null, 2),
             "utf8"
         );
 
         return {
-            success:true
+            success: true,
+            server
         };
+    } catch (error) {
+        console.error("Erro ao guardar servidor:", error);
 
-    }
-    catch(err){
-
-        console.error(err);
-
-        return{
-            success:false,
-            error:err.message
+        return {
+            success: false,
+            error: error.message
         };
-
     }
-
 });
+
 //Read Json File
-ipcMain.handle("get-servers", () => {
-
-    const filePath = path.join(__dirname, "config", "servers.json");
-
+ipcMain.handle("get-servers", async () => {
     try {
+        const serversPath = getServersPath();
+        const fileContent = fs.readFileSync(serversPath, "utf8");
 
-        const data = fs.readFileSync(filePath, "utf-8");
-                console.log("JSON LIDO:", data);
-
-        return JSON.parse(data);
-
-    } catch (err) {
-
-        console.error(err);
+        return JSON.parse(fileContent || "[]");
+    } catch (error) {
+        console.error("Erro ao carregar servidores:", error);
         return [];
+    }
+});
 
+function getServersPath() {
+    const configFolder = path.join(app.getPath("userData"), "config");
+    const serversPath = path.join(configFolder, "servers.json");
+
+    if (!fs.existsSync(configFolder)) {
+        fs.mkdirSync(configFolder, { recursive: true });
     }
 
-});
+    if (!fs.existsSync(serversPath)) {
+        fs.writeFileSync(serversPath, "[]", "utf8");
+    }
+
+    return serversPath;
+}
 
 app.on("window-all-closed", () => {
 

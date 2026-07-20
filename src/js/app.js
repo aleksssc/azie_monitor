@@ -78,6 +78,7 @@ async function loadPage(page) {
 
             case "servers.html":
                 initServers();
+                loadServers();
 
                 setTimeout(() => {
                     checkServersStatus();
@@ -527,45 +528,33 @@ async function initServers(){
 }
 
 //Save Json
-function initAddServer() {
+async function initAddServer() {
+    const form = document.getElementById("add-server-form");
 
-    bindNavigation();
+    if (!form) return;
 
-    const saveButton = document.getElementById("save-server");
-
-    if(!saveButton) return;
-
-    saveButton.addEventListener("click", async () => {
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
 
         const server = {
-
-            name: document.getElementById("server-name").value,
-
-            ip: document.getElementById("server-ip").value,
-
-            description: document.getElementById("server-description").value,
-
+            name: document.getElementById("server-name").value.trim(),
+            ip: document.getElementById("server-ip").value.trim(),
+            port: document.getElementById("server-port").value.trim(),
+            type: document.getElementById("server-type").value,
             os: document.getElementById("server-os").value
-
         };
 
         const result = await window.api.saveServer(server);
 
-        if(result.success){
-
-            alert("Server saved successfully!");
-
-            loadPage("servers.html");
-
-        }
-        else{
-
-            alert(result.error);
-
+        if (!result.success) {
+            console.error("Erro ao guardar:", result.error);
+            alert("Não foi possível guardar o servidor.");
+            return;
         }
 
+        form.reset();
+        await loadPage("servers.html");
     });
-
 }
 
 async function checkServersStatus() {
