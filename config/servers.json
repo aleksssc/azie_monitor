@@ -1,0 +1,22 @@
+{
+    "servers": [
+        {
+            "name": "Portátil",
+            "ip": "192.168.1.10",
+            "description": "Teste",
+            "os": "Windows"
+        },
+        {
+            "name": "CloudFlare",
+            "ip": "1.1.1.1",
+            "description": "teste2",
+            "os": "Windows Server"
+        },
+        {
+            "name": "Kali_old",
+            "ip": "192.168.1.52",
+            "description": "Teste3",
+            "os": "Linux"
+        }
+    ]
+}
