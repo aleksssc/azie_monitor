@@ -22,13 +22,15 @@ window.addEventListener("load", () => {
 // Load page
 async function loadPage(page) {
 
+    // Cada navegação recebe um ID novo
     const currentNavigation = ++navigationId;
 
     try {
 
         const html = await window.api.loadPage(page);
 
-        // Se entretanto houve outro clique, ignora este resultado
+        // Se o utilizador já clicou noutra página,
+        // ignora o resultado desta navegação antiga
         if (currentNavigation !== navigationId) {
             return;
         }
@@ -40,6 +42,24 @@ async function loadPage(page) {
         }
 
         pageContent.innerHTML = html;
+
+        // Atualiza o botão ativo do menu
+        document.querySelectorAll(".menu-btn").forEach(btn => {
+            btn.classList.remove("active");
+        });
+
+        const activeBtn = document.querySelector(
+            `.menu-btn[data-page="${page}"]`
+        );
+
+        if (activeBtn) {
+            activeBtn.classList.add("active");
+        }
+
+        // Para a monitorização quando saímos dos servidores
+        if (page !== "servers.html") {
+            stopServerStatusMonitoring();
+        }
 
         switch (page) {
 
@@ -55,14 +75,37 @@ async function loadPage(page) {
                 initPing();
                 break;
 
+            case "tools/traceroute.html":
+                initTraceroute();
+                break;
+
+            case "tools/dnslookup.html":
+                initDnsLookup();
+                break;
+
+            case "tools/whois.html":
+                initWhois();
+                break;
+
+            case "tools/portscan.html":
+                initPortScan();
+                break;
+
+            case "tools/rdp.html":
+                initRdp();
+                break;
+
             case "servers.html":
                 initServers();
 
                 setTimeout(() => {
 
-                    // Confirma que ainda estamos na mesma página
-                    if (currentNavigation === navigationId) {
-                        checkServersStatus();
+                    // Só inicia se ainda estivermos nesta navegação
+                    if (
+                        currentNavigation === navigationId &&
+                        page === "servers.html"
+                    ) {
+                        startServerStatusMonitoring();
                     }
 
                 }, 1000);
@@ -80,11 +123,15 @@ async function loadPage(page) {
             case "about.html":
                 initAbout();
                 break;
+
+            default:
+                console.warn("Página sem inicialização definida:", page);
+                break;
         }
 
     } catch (err) {
 
-        // Só apresenta o erro se esta ainda for a navegação atual
+        // Só mostra o erro se esta ainda for a navegação atual
         if (currentNavigation === navigationId) {
             console.error("Erro ao carregar página:", err);
         }
@@ -95,11 +142,15 @@ function bindNavigation(container = document) {
 
     container.querySelectorAll("[data-page]").forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener("click", event => {
 
             event.preventDefault();
 
-            const page = link.dataset.page;
+            const page = button.dataset.page;
+
+            if (!page) {
+                return;
+            }
 
             loadPage(page);
 
