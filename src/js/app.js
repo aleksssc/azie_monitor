@@ -78,10 +78,9 @@ async function loadPage(page) {
 
             case "servers.html":
                 initServers();
-                loadServers();
 
                 setTimeout(() => {
-                    checkServersStatus();
+                     startServerStatusMonitoring();
                 }, 1000);
 
                 break;
@@ -457,24 +456,19 @@ function initRdp() {
 }
 
 //Load and navigate Server page
-async function initServers(){
+async function initServers() {
+
     bindNavigation();
 
-    const data = await window.api.getServers();
-
-    const servers = data.servers;
-
+    const servers = await window.api.getServers();
 
     const container = document.getElementById("servers-list");
 
-
-    if(!container) return;
-
+    if (!container) return;
 
     container.innerHTML = "";
 
     servers.forEach(server => {
-        console.log(server);
 
         const card = document.createElement("div");
 
@@ -483,14 +477,14 @@ async function initServers(){
         if (server.os.toLowerCase().includes("windows")) {
             osIcon = "fa-brands fa-windows";
         }
-        else if (server.os.toLowerCase().includes("linux")) {
-            osIcon = "fa-brands fa-linux";
-        }
         else if (server.os.toLowerCase().includes("ubuntu")) {
             osIcon = "fa-brands fa-ubuntu";
         }
         else if (server.os.toLowerCase().includes("debian")) {
             osIcon = "fa-brands fa-debian";
+        }
+        else if (server.os.toLowerCase().includes("linux")) {
+            osIcon = "fa-brands fa-linux";
         }
         else {
             osIcon = "fa-solid fa-server";
@@ -498,26 +492,27 @@ async function initServers(){
 
         card.innerHTML = `
             <div class="server-card" data-ip="${server.ip}">
-            <div class="server-header">
 
-                <div class="os-icon">
-                    <i class="${osIcon}"></i>   
+                <div class="server-header">
+
+                    <div class="os-icon">
+                        <i class="${osIcon}"></i>
+                    </div>
+
+                    <div class="server-status"></div>
+
                 </div>
 
-                <div class="server-status"></div>
+                <div class="server-info">
 
-            </div>
+                    <h3>${server.name}</h3>
 
+                    <p>${server.ip}</p>
 
-            <div class="server-info">
+                    <span>${server.os}</span>
 
-                <h3>${server.name}</h3>
+                </div>
 
-                <p>${server.ip}</p>
-
-                <span>${server.os}</span>
-
-            </div>
             </div>
         `;
 
@@ -525,36 +520,54 @@ async function initServers(){
 
     });
 
+    startServerStatusMonitoring();
 }
 
 //Save Json
-async function initAddServer() {
-    const form = document.getElementById("add-server-form");
+function initAddServer() {
 
-    if (!form) return;
+    const saveButton = document.querySelector("#save-server");
 
-    form.addEventListener("submit", async event => {
-        event.preventDefault();
+    if (!saveButton) {
+        console.error("Save Server button not found.");
+        return;
+    }
 
-        const server = {
-            name: document.getElementById("server-name").value.trim(),
-            ip: document.getElementById("server-ip").value.trim(),
-            port: document.getElementById("server-port").value.trim(),
-            type: document.getElementById("server-type").value,
-            os: document.getElementById("server-os").value
-        };
+    saveButton.addEventListener("click", async () => {
 
-        const result = await window.api.saveServer(server);
+        const name = document.querySelector("#server-name").value.trim();
+        const ip = document.querySelector("#server-ip").value.trim();
+        const description = document
+            .querySelector("#server-description")
+            .value.trim();
+        const os = document.querySelector("#server-os").value;
 
-        if (!result.success) {
-            console.error("Erro ao guardar:", result.error);
-            alert("Não foi possível guardar o servidor.");
+        if (!name || !ip) {
+            console.error("Name and IP are required.");
             return;
         }
 
-        form.reset();
-        await loadPage("servers.html");
+        const server = {
+            name,
+            ip,
+            description,
+            os
+        };
+
+        console.log("A enviar servidor:", server);
+
+        const result = await window.api.saveServer(server);
+
+        console.log("Resposta do main:", result);
+
+        if (result.success) {
+            loadPage("servers.html");
+        } else {
+            console.error(result.error);
+        }
+
     });
+
 }
 
 async function checkServersStatus() {

@@ -298,24 +298,29 @@ ipcMain.handle("check-online", async (event, target) => {
 });
 
 //Save Json File
-ipcMain.handle("save-server", async (event, server) => {
+ipcMain.handle("save-server", async (event, newServer) => {
     try {
         const serversPath = getServersPath();
-        const fileContent = fs.readFileSync(serversPath, "utf8");
-        const servers = JSON.parse(fileContent || "[]");
 
-        servers.push(server);
+        let servers = [];
+
+        if (fs.existsSync(serversPath)) {
+            const data = fs.readFileSync(serversPath, "utf-8");
+            servers = JSON.parse(data || "[]");
+        }
+
+        servers.push(newServer);
 
         fs.writeFileSync(
             serversPath,
             JSON.stringify(servers, null, 2),
-            "utf8"
+            "utf-8"
         );
 
         return {
-            success: true,
-            server
+            success: true
         };
+
     } catch (error) {
         console.error("Erro ao guardar servidor:", error);
 
@@ -342,6 +347,7 @@ ipcMain.handle("get-servers", async () => {
 function getServersPath() {
     const configFolder = path.join(app.getPath("userData"), "config");
     const serversPath = path.join(configFolder, "servers.json");
+
 
     if (!fs.existsSync(configFolder)) {
         fs.mkdirSync(configFolder, { recursive: true });
