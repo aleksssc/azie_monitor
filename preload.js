@@ -35,4 +35,10 @@ contextBridge.exposeInMainWorld("api", {
     // Test
     checkOnline: (target) => ipcRenderer.invoke("check-online", target),
 
+    // Get Groups
+    getGroups: () => ipcRenderer.invoke("get-groups"),
+
+    // Save Groups
+    saveGroup: (group) => ipcRenderer.invoke("save-group", group),
+
 });

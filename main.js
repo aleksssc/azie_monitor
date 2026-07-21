@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const whois = require("whois");
 const net = require("net");
+const crypto = require("crypto");
 
 app.whenReady().then(() => {
 
@@ -383,18 +384,53 @@ ipcMain.handle("check-online", async (event, target) => {
 
 });
 
-//Save Json File
+// Add Server
 ipcMain.handle("save-server", async (event, newServer) => {
 
     try {
 
         const serversPath = getDataFilePath("servers.json");
 
-        const data = fs.readFileSync(serversPath, "utf8");
+        const fileContent = fs.readFileSync(
+            serversPath,
+            "utf8"
+        );
 
-        const servers = JSON.parse(data || "[]");
+        const servers = JSON.parse(
+            fileContent || "[]"
+        );
 
-        servers.push(newServer);
+        const server = {
+
+            id: `server-${crypto.randomUUID()}`,
+
+            name: String(
+                newServer.name || ""
+            ).trim(),
+
+            ip: String(
+                newServer.ip || ""
+            ).trim(),
+
+            description: String(
+                newServer.description || ""
+            ).trim(),
+
+            os: newServer.os || "Windows Server",
+
+            groupId: newServer.groupId || "default"
+
+        };
+
+        if (!server.name || !server.ip) {
+
+            throw new Error(
+                "Server name and IP are required."
+            );
+
+        }
+
+        servers.push(server);
 
         fs.writeFileSync(
             serversPath,
@@ -403,12 +439,16 @@ ipcMain.handle("save-server", async (event, newServer) => {
         );
 
         return {
-            success: true
+            success: true,
+            server
         };
 
     } catch (error) {
 
-        console.error("Erro ao guardar servidor:", error);
+        console.error(
+            "Erro ao guardar servidor:",
+            error
+        );
 
         return {
             success: false,
@@ -419,7 +459,7 @@ ipcMain.handle("save-server", async (event, newServer) => {
 
 });
 
-//Read Json File
+// Get Server
 ipcMain.handle("get-servers", async () => {
 
     try {
@@ -438,6 +478,82 @@ ipcMain.handle("get-servers", async () => {
         console.error("Erro ao carregar servidores:", error);
 
         return [];
+
+    }
+
+});
+
+// Read Groups
+ipcMain.handle("get-groups", async () => {
+
+    try {
+
+        const groupsPath = getDataFilePath("groups.json");
+
+        const fileContent = fs.readFileSync(
+            groupsPath,
+            "utf8"
+        );
+
+        return JSON.parse(fileContent || "[]");
+
+    } catch (error) {
+
+        console.error("Erro ao carregar grupos:", error);
+
+        return [];
+
+    }
+
+});
+
+// Save Group
+ipcMain.handle("save-group", async (event, newGroup) => {
+
+    try {
+
+        const groupsPath = getDataFilePath("groups.json");
+
+        const fileContent = fs.readFileSync(
+            groupsPath,
+            "utf8"
+        );
+
+        const groups = JSON.parse(fileContent || "[]");
+
+        const group = {
+            id: `group-${Date.now()}`,
+            name: String(newGroup.name || "").trim(),
+            description: String(newGroup.description || "").trim(),
+            icon: newGroup.icon || "fa-server",
+            color: newGroup.color || "#6b7280"
+        };
+
+        if (!group.name) {
+            throw new Error("Group name is required.");
+        }
+
+        groups.push(group);
+
+        fs.writeFileSync(
+            groupsPath,
+            JSON.stringify(groups, null, 4),
+            "utf8"
+        );
+
+        return {
+            success: true,
+            group
+        };
+
+    } catch (error) {
+
+        console.error("Erro ao guardar grupo:", error);
+
+        return {
+            success: false,
+            error: error.message
+        };
 
     }
 

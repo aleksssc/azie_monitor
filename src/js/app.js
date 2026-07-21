@@ -116,6 +116,14 @@ async function loadPage(page) {
                 initAddServer();
                 break;
 
+            case "servers/manage_groups.html":
+                initManageGroups();
+                break;
+
+            case "servers/add_group.html":
+                initAddGroup();
+                break;
+
             case "settings.html":
                 initSettings();
                 break;
@@ -503,12 +511,98 @@ function initRdp() {
 
 }
 
-//Load and navigate Server page
+//List Servers
+function createServerCard(server) {
+
+    const card = document.createElement("div");
+
+    const serverOs = String(server.os || "").toLowerCase();
+
+    let osIcon;
+
+    if (serverOs.includes("windows")) {
+        osIcon = "fa-brands fa-windows";
+    }
+    else if (serverOs.includes("ubuntu")) {
+        osIcon = "fa-brands fa-ubuntu";
+    }
+    else if (serverOs.includes("debian")) {
+        osIcon = "fa-brands fa-debian";
+    }
+    else if (serverOs.includes("linux")) {
+        osIcon = "fa-brands fa-linux";
+    }
+    else {
+        osIcon = "fa-solid fa-server";
+    }
+
+    card.className = "server-card";
+    card.dataset.ip = server.ip;
+    card.dataset.groupId = server.groupId || "default";
+
+    card.innerHTML = `
+        <div class="server-header">
+
+            <div class="os-icon">
+                <i class="${osIcon}"></i>
+            </div>
+
+            <div class="server-status"></div>
+
+        </div>
+
+        <div class="server-info">
+
+            <h3>${server.name}</h3>
+
+            <p>${server.ip}</p>
+
+            <span>${server.os || "Unknown OS"}</span>
+
+        </div>
+
+        <div class="server-actions">
+
+            <button
+                class="server-action-btn rdp-btn"
+                data-ip="${server.ip}"
+                title="Abrir Remote Desktop"
+            >
+                <i class="fa-solid fa-display"></i>
+                <span>RDP</span>
+            </button>
+
+            <button
+                class="server-action-btn ping-btn"
+                data-ip="${server.ip}"
+                title="Executar Ping"
+            >
+                <i class="fa-solid fa-signal"></i>
+                <span>Ping</span>
+            </button>
+
+            <button
+                class="server-action-btn edit-btn"
+                title="Editar servidor"
+            >
+                <i class="fa-solid fa-pen"></i>
+            </button>
+
+        </div>
+    `;
+
+    return card;
+}
+
+//Load Groups and navigate Server page
 async function initServers() {
 
     bindNavigation();
 
-    const servers = await window.api.getServers();
+    const [servers, groups] = await Promise.all([
+        window.api.getServers(),
+        window.api.getGroups()
+    ]);
 
     const container = document.getElementById("servers-list");
 
@@ -516,102 +610,248 @@ async function initServers() {
 
     container.innerHTML = "";
 
-    servers.forEach(server => {
+    groups.forEach(group => {
 
-        const card = document.createElement("div");
+        const groupServers = servers.filter(server => {
 
-        let osIcon;
+            const serverGroupId = server.groupId || "default";
 
-        if (server.os.toLowerCase().includes("windows")) {
-            osIcon = "fa-brands fa-windows";
+            return serverGroupId === group.id;
+
+        });
+
+        const groupSection = document.createElement("section");
+
+        if (group.id === "default") {
+            groupSection.className = "server-group-section";
+        } else {
+            groupSection.className = "server-group-section collapsed";
         }
-        else if (server.os.toLowerCase().includes("ubuntu")) {
-            osIcon = "fa-brands fa-ubuntu";
-        }
-        else if (server.os.toLowerCase().includes("debian")) {
-            osIcon = "fa-brands fa-debian";
-        }
-        else if (server.os.toLowerCase().includes("linux")) {
-            osIcon = "fa-brands fa-linux";
-        }
-        else {
-            osIcon = "fa-solid fa-server";
-        }
+        groupSection.dataset.groupId = group.id;
 
-        card.innerHTML = `
-            <div class="server-card" data-ip="${server.ip}">
+        groupSection.style.setProperty("--group-color",group.color || "#6b7280");
 
-                <div class="server-header">
+        groupSection.innerHTML = `
+            <div class="server-group-header">
 
-                    <div class="os-icon">
-                        <i class="${osIcon}"></i>
-                    </div>
+                <div class="server-group-title">
 
-                    <div class="server-status"></div>
+                    <i class="fa-solid ${group.icon || "fa-building"}" style="color:#6b7280"></i>
+
+                    <h2>${group.name}</h2>
+
+                    <span class="server-count">
+                        ${groupServers.length}
+                        ${groupServers.length === 1 ? "server" : "servers"}
+                    </span>
 
                 </div>
 
-                <div class="server-info">
-
-                    <h3>${server.name}</h3>
-
-                    <p>${server.ip}</p>
-
-                    <span>${server.os}</span>
-
-                </div>
-
-                <div class="server-actions">
-
-                    <button class="server-action-btn rdp-btn" data-ip="${server.ip}" title="Abrir Remote Desktop">
-                        <i class="fa-solid fa-display"></i>
-                        <span>RDP</span>
-                    </button>
-
-                    <button class="server-action-btn ping-btn" data-ip="${server.ip}" title="Executar Ping">
-                        <i class="fa-solid fa-signal"></i>
-                        <span>Ping</span>
-                    </button>
-
-                    <button class="server-action-btn edit-btn" title="Editar servidor">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-
-                </div>
+                <button class="group-toggle-btn" data-group-id="${group.id}">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
 
             </div>
+
+            <div class="server-group-content"></div>
         `;
 
-        container.appendChild(card);
+        const groupContent = groupSection.querySelector(
+            ".server-group-content"
+        );
+
+        groupServers.forEach(server => {
+
+            const card = createServerCard(server);
+
+            groupContent.appendChild(card);
+
+        });
+
+        container.appendChild(groupSection);
 
     });
 
+    initGroupToggleButtons();
+
     startServerStatusMonitoring();
+}
+
+//Logic Open and close groups
+function initGroupToggleButtons() {
+
+    const buttons = document.querySelectorAll(
+        ".group-toggle-btn"
+    );
+
+    buttons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const groupSection = button.closest(
+                ".server-group-section"
+            );
+
+            const groupContent = groupSection.querySelector(
+                ".server-group-content"
+            );
+
+            const icon = button.querySelector("i");
+
+            const isCollapsed = groupSection.classList.toggle(
+                "collapsed"
+            );
+
+            groupContent.style.display = isCollapsed
+                ? "none"
+                : "grid";
+
+            icon.className = isCollapsed
+                ? "fa-solid fa-chevron-down"
+                : "fa-solid fa-chevron-up";
+
+        });
+
+    });
+
+}
+
+function toggleServerGroup(section) {
+
+    const content = section.querySelector(".server-group-content");
+
+    if (!content) return;
+
+    const isCollapsed = section.classList.contains("collapsed");
+
+    if (isCollapsed) {
+
+        // Abrir o grupo
+        section.classList.remove("collapsed");
+
+        content.style.height = "0px";
+        content.style.opacity = "0";
+
+        const targetHeight = content.scrollHeight;
+
+        requestAnimationFrame(() => {
+
+            content.style.height = `${targetHeight}px`;
+            content.style.opacity = "1";
+
+        });
+
+        const handleExpandEnd = event => {
+
+            if (event.propertyName !== "height") return;
+
+            content.style.height = "auto";
+
+            content.removeEventListener(
+                "transitionend",
+                handleExpandEnd
+            );
+        };
+
+        content.addEventListener(
+            "transitionend",
+            handleExpandEnd
+        );
+
+    } else {
+
+        // Fechar o grupo
+        content.style.height = `${content.scrollHeight}px`;
+
+        // Força o browser a registar a altura inicial
+        content.offsetHeight;
+
+        section.classList.add("collapsed");
+
+        requestAnimationFrame(() => {
+
+            content.style.height = "0px";
+            content.style.opacity = "0";
+
+        });
+    }
+}
+
+function initGroupToggleButtons() {
+
+    document
+        .querySelectorAll(".group-toggle-btn")
+        .forEach(button => {
+
+            button.addEventListener("click", event => {
+
+                event.stopPropagation();
+
+                const section = button.closest(
+                    ".server-group-section"
+                );
+
+                if (!section) return;
+
+                toggleServerGroup(section);
+            });
+
+        });
 }
 
 //Save Json
 function initAddServer() {
 
+    const cancelButton = document.querySelector(
+        "#cancel-server-btn"
+    );
+
+    cancelButton?.addEventListener("click", () => {
+
+        loadPage("servers.html");
+
+    });
+
+
     const saveButton = document.querySelector("#save-server");
 
     if (!saveButton) {
+
         console.error("Save Server button not found.");
+
         return;
+
     }
+
 
     saveButton.addEventListener("click", async () => {
 
-        const name = document.querySelector("#server-name").value.trim();
-        const ip = document.querySelector("#server-ip").value.trim();
+        const name = document
+            .querySelector("#server-name")
+            .value
+            .trim();
+
+        const ip = document
+            .querySelector("#server-ip")
+            .value
+            .trim();
+
         const description = document
             .querySelector("#server-description")
-            .value.trim();
+            .value
+            .trim();
+
         const os = document.querySelector("#server-os").value;
 
+
         if (!name || !ip) {
+
             console.error("Name and IP are required.");
+
             return;
+
         }
+
 
         const server = {
             name,
@@ -620,20 +860,282 @@ function initAddServer() {
             os
         };
 
+
         console.log("A enviar servidor:", server);
 
         const result = await window.api.saveServer(server);
 
         console.log("Resposta do main:", result);
 
+
         if (result.success) {
+
             loadPage("servers.html");
+
         } else {
+
             console.error(result.error);
+
         }
 
     });
 
+}
+
+//Add Group
+function initAddGroup(){
+
+    const nameInput = document.getElementById("group-name");
+    const descriptionInput = document.getElementById(
+        "group-description"
+    );
+    const iconSelect = document.getElementById("group-icon");
+    const colorInput = document.getElementById("group-color");
+
+    const colorValue = document.getElementById(
+        "group-color-value"
+    );
+
+    const previewIcon = document.getElementById(
+        "group-preview-icon"
+    );
+
+    const previewName = document.getElementById(
+        "group-preview-name"
+    );
+
+    const previewDescription = document.getElementById(
+        "group-preview-description"
+    );
+
+    const saveButton = document.getElementById(
+        "save-group-btn"
+    );
+
+    const cancelButton = document.getElementById(
+        "cancel-group-btn"
+    );
+
+    if(
+        !nameInput ||
+        !descriptionInput ||
+        !iconSelect ||
+        !colorInput ||
+        !saveButton
+    ){
+        return;
+    }
+
+    function updatePreview(){
+
+        const name = nameInput.value.trim();
+        const description = descriptionInput.value.trim();
+        const icon = iconSelect.value;
+        const color = colorInput.value;
+
+        previewName.textContent =
+            name || "Group Name";
+
+        previewDescription.textContent =
+            description || "Group description";
+
+        previewIcon.style.color = color;
+
+        previewIcon.innerHTML = `
+            <i class="fa-solid ${icon}"></i>
+        `;
+
+        colorValue.textContent = color;
+    }
+
+    nameInput.addEventListener("input", updatePreview);
+    descriptionInput.addEventListener("input", updatePreview);
+    iconSelect.addEventListener("change", updatePreview);
+    colorInput.addEventListener("input", updatePreview);
+
+    cancelButton?.addEventListener("click", () => {
+
+        loadPage("servers/manage_groups.html");
+
+    });
+
+    saveButton.addEventListener("click", async () => {
+
+        const group = {
+            name: nameInput.value.trim(),
+            description: descriptionInput.value.trim(),
+            icon: iconSelect.value,
+            color: colorInput.value
+        };
+
+        if (!group.name) {
+
+            nameInput.focus();
+            nameInput.classList.add("input-error");
+
+            return;
+        }
+
+        nameInput.classList.remove("input-error");
+
+        try {
+
+            saveButton.disabled = true;
+
+            saveButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Saving...
+            `;
+
+            const result = await window.api.saveGroup(group);
+
+            if (!result?.success) {
+                throw new Error(
+                    result?.error || "Could not save group."
+                );
+            }
+
+            loadPage("servers/manage_groups.html");
+
+        } catch (error) {
+
+            console.error("Error saving group:", error);
+
+            alert(error.message);
+
+            saveButton.disabled = false;
+
+            saveButton.innerHTML = `
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Group
+            `;
+
+        }
+
+    });
+
+    updatePreview();
+}
+
+//Save Groups
+async function initManageGroups() {
+
+    const groupsList = document.getElementById("groups-list");
+    const addGroupButton = document.getElementById("add-group-btn");
+
+    if (!groupsList) return;
+
+    const [groups, servers] = await Promise.all([
+        window.api.getGroups(),
+        window.api.getServers()
+    ]);
+
+    groupsList.innerHTML = "";
+
+    groups.forEach(group => {
+
+        const groupServers = servers.filter(server => {
+
+            const groupId = server.groupId || "default";
+
+            return groupId === group.id;
+
+        });
+
+        const groupCard = createGroupCard(
+            group,
+            groupServers.length
+        );
+
+        groupsList.appendChild(groupCard);
+
+    });
+
+    addGroupButton?.addEventListener("click", () => {
+
+        loadPage("servers/add_group.html");
+
+    });
+
+}
+
+//List button manage groups
+function createGroupCard(group, serverCount) {
+
+    const card = document.createElement("div");
+
+    card.className = "group-card";
+    card.style.setProperty("--group-color",group.color);
+    card.dataset.groupId = group.id;
+
+    card.innerHTML = `
+
+        <div class="group-card-icon" style="color:#6b7280">
+            <i class="fa-solid ${group.icon || "fa-layer-group"}"></i>
+        </div>
+
+        <div class="group-card-info">
+
+            <h3>${group.name}</h3>
+
+            <p>
+                ${group.description || "No description"}
+            </p>
+
+            <span>
+                ${serverCount}
+                ${serverCount === 1 ? "server" : "servers"}
+            </span>
+
+        </div>
+
+        <div class="group-card-actions">
+
+            <button
+                class="group-action-btn edit-group-btn"
+                type="button"
+                title="Edit group"
+            >
+                <i class="fa-solid fa-pen"></i>
+            </button>
+
+            ${
+                group.id !== "default"
+                    ? `
+                        <button
+                            class="group-action-btn delete-group-btn"
+                            type="button"
+                            title="Delete group"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `
+                    : ""
+            }
+
+        </div>
+
+    `;
+
+    card
+        .querySelector(".edit-group-btn")
+        ?.addEventListener("click", () => {
+
+            loadPage(
+                `servers/edit_group.html?id=${group.id}`
+            );
+
+        });
+
+    card
+        .querySelector(".delete-group-btn")
+        ?.addEventListener("click", () => {
+
+            deleteGroup(group.id);
+
+        });
+
+    return card;
 }
 
 async function checkServersStatus() {

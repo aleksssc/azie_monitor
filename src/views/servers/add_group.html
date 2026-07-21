@@ -1,0 +1,141 @@
+<div class="server-form">
+
+    <div class="page-header">
+
+        <div>
+            <h1>Add Group</h1>
+            <p>Create a new group to organize your servers.</p>
+        </div>
+
+    </div>
+
+    <div class="form-card">
+
+        <div class="input-group">
+
+            <label for="group-name">
+                Group Name
+            </label>
+
+            <input
+                id="group-name"
+                type="text"
+                placeholder="Example: Royal Óbidos"
+                autocomplete="off"
+            >
+
+        </div>
+
+        <div class="input-group">
+
+            <label for="group-description">
+                Description
+            </label>
+
+            <input id="group-description" placeholder="Short description of this group"></input>
+
+        </div>
+
+        <div class="input-group">
+
+            <label for="group-icon">
+                Icon
+            </label>
+
+            <select id="group-icon">
+
+                <option value="fa-layer-group">
+                    Layer Group
+                </option>
+
+                <option value="fa-building">
+                    Building
+                </option>
+
+                <option value="fa-folder">
+                    Folder
+                </option>
+
+                <option value="fa-folder-tree">
+                    Folder Tree
+                </option>
+
+                <option value="fa-network-wired">
+                    Network
+                </option>
+
+                <option value="fa-server">
+                    Server
+                </option>
+
+                <option value="fa-database">
+                    Database
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="input-group">
+
+            <label for="group-color">
+                Color
+            </label>
+
+            <div class="group-color-field">
+
+                <input id="group-color" type="color" value="#3b82f6">
+
+                <span id="group-color-value">
+                    #3b82f6
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="group-preview">
+
+            <span>Preview</span>
+
+            <div class="group-preview-card">
+
+                <div
+                    id="group-preview-icon"
+                    class="group-preview-icon"
+                >
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+
+                <div>
+
+                    <h3 id="group-preview-name">
+                        Group Name
+                    </h3>
+
+                    <p id="group-preview-description">
+                        Group description
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="form-buttons">
+
+            <button id="cancel-group-btn" class="secondary-btn" type="button">
+                Cancel
+            </button>
+
+            <button id="save-group-btn" class="primary-btn" type="button">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Group
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
