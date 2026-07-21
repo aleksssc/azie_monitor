@@ -559,6 +559,266 @@ ipcMain.handle("save-group", async (event, newGroup) => {
 
 });
 
+// Edit Groups
+ipcMain.handle("update-group-servers",async (event, data) => {
+
+        try {
+
+            const groupId = String(
+                data?.groupId || ""
+            ).trim();
+
+            const serverIds = Array.isArray(
+                data?.serverIds
+            )
+                ? data.serverIds
+                : [];
+
+
+            if (!groupId) {
+
+                throw new Error(
+                    "Group ID is required."
+                );
+
+            }
+
+
+            const serversPath =
+                getDataFilePath("servers.json");
+
+
+            const fileContent = fs.readFileSync(
+                serversPath,
+                "utf8"
+            );
+
+
+            const servers = JSON.parse(
+                fileContent || "[]"
+            );
+
+
+            const selectedIds =
+                new Set(serverIds);
+
+
+            const updatedServers = servers.map(
+                server => {
+
+                    /*
+                    Se foi selecionado:
+                    move para o grupo atual.
+                    */
+
+                    if (
+                        selectedIds.has(server.id)
+                    ) {
+
+                        return {
+                            ...server,
+                            groupId
+                        };
+
+                    }
+
+
+                    /*
+                    Se já pertencia a este grupo,
+                    mas foi desselecionado:
+                    volta para default.
+                    */
+
+                    if (
+                        server.groupId === groupId
+                    ) {
+
+                        return {
+                            ...server,
+                            groupId: "default"
+                        };
+
+                    }
+
+
+                    /*
+                    Servidores de outros grupos
+                    permanecem iguais.
+                    */
+
+                    return server;
+
+                }
+            );
+
+
+            fs.writeFileSync(
+                serversPath,
+                JSON.stringify(
+                    updatedServers,
+                    null,
+                    4
+                ),
+                "utf8"
+            );
+
+
+            return {
+                success: true,
+                updatedServers
+            };
+
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao atualizar servidores do grupo:",
+                error
+            );
+
+            return {
+                success: false,
+                error: error.message
+            };
+
+        }
+
+    }
+);
+
+// Delete Groups
+ipcMain.handle("delete-group",async (event, receivedGroupId) => {
+
+        try {
+
+            const groupId = String(
+                receivedGroupId || ""
+            ).trim();
+
+            if (!groupId) {
+
+                throw new Error(
+                    "Group ID is required."
+                );
+
+            }
+
+            if (groupId === "default") {
+
+                throw new Error(
+                    "The default group cannot be deleted."
+                );
+
+            }
+
+
+            const groupsPath =
+                getDataFilePath("groups.json");
+
+            const serversPath =
+                getDataFilePath("servers.json");
+
+
+            const groupsContent = fs.readFileSync(
+                groupsPath,
+                "utf8"
+            );
+
+            const serversContent = fs.readFileSync(
+                serversPath,
+                "utf8"
+            );
+
+
+            const groups = JSON.parse(
+                groupsContent || "[]"
+            );
+
+            const servers = JSON.parse(
+                serversContent || "[]"
+            );
+
+
+            const groupExists = groups.some(
+                group => group.id === groupId
+            );
+
+            if (!groupExists) {
+
+                throw new Error(
+                    "Group not found."
+                );
+
+            }
+
+
+            const updatedGroups = groups.filter(
+                group => group.id !== groupId
+            );
+
+
+            const updatedServers = servers.map(
+                server => {
+
+                    if (server.groupId === groupId) {
+
+                        return {
+                            ...server,
+                            groupId: "default"
+                        };
+
+                    }
+
+                    return server;
+
+                }
+            );
+
+
+            fs.writeFileSync(
+                groupsPath,
+                JSON.stringify(
+                    updatedGroups,
+                    null,
+                    4
+                ),
+                "utf8"
+            );
+
+
+            fs.writeFileSync(
+                serversPath,
+                JSON.stringify(
+                    updatedServers,
+                    null,
+                    4
+                ),
+                "utf8"
+            );
+
+
+            return {
+                success: true,
+                deletedGroupId: groupId
+            };
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao eliminar grupo:",
+                error
+            );
+
+            return {
+                success: false,
+                error: error.message
+            };
+
+        }
+
+    }
+);
+
 function getDataFilePath(fileName) {
 
     return path.join(

@@ -124,6 +124,10 @@ async function loadPage(page) {
                 initAddGroup();
                 break;
 
+            case "servers/edit_group.html":
+                initEditGroup();
+                break;
+
             case "settings.html":
                 initSettings();
                 break;
@@ -896,6 +900,10 @@ function initAddGroup(){
         "group-color-value"
     );
 
+    const previewCard = document.querySelector(
+        ".group-preview-card"
+    );
+
     const previewIcon = document.getElementById(
         "group-preview-icon"
     );
@@ -939,7 +947,10 @@ function initAddGroup(){
         previewDescription.textContent =
             description || "Group description";
 
-        previewIcon.style.color = color;
+        previewCard.style.setProperty(
+            "--group-color",
+            color
+        );
 
         previewIcon.innerHTML = `
             <i class="fa-solid ${icon}"></i>
@@ -1017,6 +1028,411 @@ function initAddGroup(){
     updatePreview();
 }
 
+//Edit Group
+async function initEditGroup() {
+
+    const groupId = sessionStorage.getItem(
+        "editingGroupId"
+    );
+
+    const title = document.getElementById(
+        "edit-group-title"
+    );
+
+    const serversContainer = document.getElementById(
+        "edit-group-servers-list"
+    );
+
+    const searchInput = document.getElementById(
+        "edit-group-search"
+    );
+
+    const selectedCount = document.getElementById(
+        "selected-server-count"
+    );
+
+    const saveButton = document.getElementById(
+        "save-group-servers-btn"
+    );
+
+    const cancelButton = document.getElementById(
+        "cancel-edit-group-btn"
+    );
+
+    const backButton = document.getElementById(
+        "back-edit-group-btn"
+    );
+
+    if (!groupId || !serversContainer || !saveButton) {
+
+        console.error(
+            "Could not initialize Edit Group."
+        );
+
+        loadPage("servers/manage_groups.html");
+
+        return;
+    }
+
+
+    function returnToGroups() {
+
+        sessionStorage.removeItem(
+            "editingGroupId"
+        );
+
+        loadPage("servers/manage_groups.html");
+
+    }
+
+
+    cancelButton?.addEventListener(
+        "click",
+        returnToGroups
+    );
+
+    backButton?.addEventListener(
+        "click",
+        returnToGroups
+    );
+
+
+    try {
+
+        const [groups, servers] = await Promise.all([
+
+            window.api.getGroups(),
+
+            window.api.getServers()
+
+        ]);
+
+
+        const group = groups.find(
+            item => item.id === groupId
+        );
+
+        if (!group) {
+
+            throw new Error(
+                "Group not found."
+            );
+
+        }
+
+
+        title.textContent = `Edit ${group.name}`;
+
+
+        function getGroupName(currentGroupId) {
+
+            const currentGroup = groups.find(
+                item => item.id === currentGroupId
+            );
+
+            return currentGroup?.name || "Ungrouped";
+
+        }
+
+
+        function updateSelectedCount() {
+
+            const amount = serversContainer
+                .querySelectorAll(
+                    ".edit-group-server-checkbox:checked"
+                )
+                .length;
+
+            selectedCount.textContent = `
+                ${amount}
+                ${amount === 1
+                    ? "server selected"
+                    : "servers selected"
+                }
+            `;
+
+        }
+
+
+        function renderServers(searchTerm = "") {
+
+            const search =
+                searchTerm.trim().toLowerCase();
+
+            serversContainer.innerHTML = "";
+
+
+            const filteredServers = servers.filter(
+                server => {
+
+                    const text = `
+                        ${server.name || ""}
+                        ${server.ip || ""}
+                        ${server.os || ""}
+                    `.toLowerCase();
+
+                    return text.includes(search);
+
+                }
+            );
+
+
+            if (!filteredServers.length) {
+
+                serversContainer.innerHTML = `
+
+                    <div class="edit-group-empty">
+
+                        <i class="fa-solid fa-server"></i>
+
+                        <p>No servers found.</p>
+
+                    </div>
+
+                `;
+
+                updateSelectedCount();
+
+                return;
+            }
+
+
+            filteredServers.forEach(server => {
+
+                const currentGroupId =
+                    server.groupId || "default";
+
+                const isSelected =
+                    currentGroupId === groupId;
+
+
+                const serverItem =
+                    document.createElement("label");
+
+                serverItem.className =
+                    "edit-group-server-item";
+
+
+                serverItem.innerHTML = `
+
+                    <input
+                        type="checkbox"
+                        class="edit-group-server-checkbox"
+                        value="${server.id}"
+                        ${isSelected ? "checked" : ""}
+                    >
+
+                    <div class="edit-group-server-icon">
+
+                        <i class="fa-solid fa-server"></i>
+
+                    </div>
+
+                    <div class="edit-group-server-info">
+
+                        <strong>
+                            ${server.name || "Unnamed Server"}
+                        </strong>
+
+                        <span>
+                            ${server.ip || "No IP"}
+                        </span>
+
+                        <small>
+                            Current group:
+                            ${getGroupName(currentGroupId)}
+                        </small>
+
+                    </div>
+
+                    <div class="edit-group-server-check">
+
+                        <i class="fa-solid fa-check"></i>
+
+                    </div>
+
+                `;
+
+
+                serversContainer.appendChild(
+                    serverItem
+                );
+
+            });
+
+
+            serversContainer
+                .querySelectorAll(
+                    ".edit-group-server-checkbox"
+                )
+                .forEach(checkbox => {
+
+                    checkbox.addEventListener(
+                        "change",
+                        updateSelectedCount
+                    );
+
+                });
+
+
+            updateSelectedCount();
+
+        }
+
+
+        searchInput?.addEventListener(
+            "input",
+            event => {
+
+                renderServers(
+                    event.target.value
+                );
+
+            }
+        );
+
+
+        renderServers();
+
+
+        saveButton.addEventListener(
+            "click",
+            async () => {
+
+                const selectedServerIds = [
+                    ...serversContainer.querySelectorAll(
+                        ".edit-group-server-checkbox:checked"
+                    )
+                ].map(
+                    checkbox => checkbox.value
+                );
+
+
+                try {
+
+                    saveButton.disabled = true;
+
+                    saveButton.innerHTML = `
+
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Saving...
+
+                    `;
+
+
+                    const result =
+                        await window.api.updateGroupServers({
+
+                            groupId,
+
+                            serverIds:
+                                selectedServerIds
+
+                        });
+
+
+                    if (!result?.success) {
+
+                        throw new Error(
+                            result?.error ||
+                            "Could not update group."
+                        );
+
+                    }
+
+
+                    sessionStorage.removeItem(
+                        "editingGroupId"
+                    );
+
+                    loadPage("servers.html");
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Error updating servers:",
+                        error
+                    );
+
+                    alert(error.message);
+
+
+                    saveButton.disabled = false;
+
+                    saveButton.innerHTML = `
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Changes
+
+                    `;
+
+                }
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error loading Edit Group:",
+            error
+        );
+
+        alert(error.message);
+
+        returnToGroups();
+
+    }
+
+}
+
+//Delete Group
+async function deleteGroup(groupId, groupName) {
+
+    if (groupId === "default") {
+        alert("The default group cannot be deleted.");
+        return;
+    }
+
+    const confirmed = confirm(
+        `Are you sure you want to delete the group "${groupName}"?\n\n` +
+        "Servers in this group will be moved to Ungrouped."
+    );
+
+    if (!confirmed) return;
+
+    try {
+
+        const result = await window.api.deleteGroup(
+            groupId
+        );
+
+        if (!result?.success) {
+
+            throw new Error(
+                result?.error ||
+                "Could not delete the group."
+            );
+
+        }
+
+        loadPage("servers/manage_groups.html");
+
+    } catch (error) {
+
+        console.error(
+            "Error deleting group:",
+            error
+        );
+
+        alert(error.message);
+
+    }
+
+}
+
 //Save Groups
 async function initManageGroups() {
 
@@ -1070,50 +1486,55 @@ function createGroupCard(group, serverCount) {
 
     card.innerHTML = `
 
-        <div class="group-card-icon" style="color:#6b7280">
-            <i class="fa-solid ${group.icon || "fa-layer-group"}"></i>
-        </div>
+    <div class="group-card-icon" style="color:#6b7280">
+        <i class="fa-solid ${group.icon || "fa-layer-group"}"></i>
+    </div>
 
-        <div class="group-card-info">
+    <div class="group-card-info">
 
-            <h3>${group.name}</h3>
+        <h3>${group.name}</h3>
 
-            <p>
-                ${group.description || "No description"}
-            </p>
+        <p>
+            ${group.description || "No description"}
+        </p>
 
-            <span>
-                ${serverCount}
-                ${serverCount === 1 ? "server" : "servers"}
-            </span>
+        <span>
+            ${serverCount}
+            ${serverCount === 1 ? "server" : "servers"}
+        </span>
 
-        </div>
+    </div>
 
-        <div class="group-card-actions">
+    <div class="group-card-actions">
 
-            <button
+        ${
+            group.id !== "default" ?
+            `<button
                 class="group-action-btn edit-group-btn"
                 type="button"
                 title="Edit group"
             >
                 <i class="fa-solid fa-pen"></i>
             </button>
+            ` :""
+        }
 
-            ${
-                group.id !== "default"
-                    ? `
-                        <button
-                            class="group-action-btn delete-group-btn"
-                            type="button"
-                            title="Delete group"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    `
-                    : ""
-            }
+        ${
+            group.id !== "default"
+                ? 
+                `
+                    <button
+                        class="group-action-btn delete-group-btn"
+                        type="button"
+                        title="Delete group"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `
+                : ""
+        }
 
-        </div>
+    </div>
 
     `;
 
@@ -1121,9 +1542,12 @@ function createGroupCard(group, serverCount) {
         .querySelector(".edit-group-btn")
         ?.addEventListener("click", () => {
 
-            loadPage(
-                `servers/edit_group.html?id=${group.id}`
-            );
+        sessionStorage.setItem(
+            "editingGroupId",
+            group.id
+        );
+
+        loadPage("servers/edit_group.html");
 
         });
 
@@ -1131,7 +1555,10 @@ function createGroupCard(group, serverCount) {
         .querySelector(".delete-group-btn")
         ?.addEventListener("click", () => {
 
-            deleteGroup(group.id);
+            deleteGroup(
+                group.id,
+                group.name
+            );
 
         });
 

@@ -41,4 +41,10 @@ contextBridge.exposeInMainWorld("api", {
     // Save Groups
     saveGroup: (group) => ipcRenderer.invoke("save-group", group),
 
+    // Edit Groups
+    updateGroupServers: data => ipcRenderer.invoke("update-group-servers",data),
+
+    // Delete Group
+    deleteGroup: groupId => ipcRenderer.invoke("delete-group",groupId),
+
 });
