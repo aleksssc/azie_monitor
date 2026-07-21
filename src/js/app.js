@@ -187,38 +187,98 @@ function initTools() {
 //Tools
 function initPing() {
 
-    const button = document.getElementById("run-ping");
-    const input = document.getElementById("ping-target");
-    const output = document.getElementById("terminal-output");
+    const button =
+        document.getElementById("run-ping");
 
-    if (!button || !input || !output) return;
+    const input =
+        document.getElementById("ping-target");
 
-    bindEnter(input, button);
+    const output =
+        document.getElementById("terminal-output");
 
-    button.addEventListener("click", async () => {
+    if (!button || !input || !output) {
+        return;
+    }
+
+
+    async function runPing() {
 
         const target = input.value.trim();
 
         if (!target) {
-            output.textContent = "Please enter a valid host or IP address.";
+
+            output.textContent =
+                "Please enter a valid host or IP address.";
+
             return;
+
         }
 
-        output.textContent = "Running ping...";
+
+        const originalButtonContent =
+            button.innerHTML;
+
+
+        button.disabled = true;
+
+        button.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Running...
+        `;
+
+        output.textContent =
+            `Running ping to ${target}...`;
+
 
         try {
 
-            const result = await window.api.ping(target);
+            const result =
+                await window.api.ping(target);
 
             output.textContent = result;
 
-        } catch (err) {
+        } catch (error) {
 
-            output.textContent = err.message || err;
+            output.textContent =
+                `Error: ${error.message || error}`;
+
+        } finally {
+
+            button.disabled = false;
+
+            button.innerHTML =
+                originalButtonContent;
 
         }
 
-    });
+    }
+
+
+    bindEnter(input, button);
+
+    button.addEventListener(
+        "click",
+        runPing
+    );
+
+
+    const serverTarget =
+        sessionStorage.getItem(
+            "serverPingTarget"
+        );
+
+
+    if (serverTarget) {
+
+        sessionStorage.removeItem(
+            "serverPingTarget"
+        );
+
+        input.value = serverTarget;
+
+        runPing();
+
+    }
 
 }
 
@@ -594,6 +654,22 @@ function createServerCard(server) {
 
         </div>
     `;
+
+    const pingButton = card.querySelector(".ping-btn");
+
+    pingButton?.addEventListener("click", event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        sessionStorage.setItem(
+            "serverPingTarget",
+            server.ip
+        );
+
+        loadPage("tools/ping.html");
+
+    });
 
     return card;
 }
