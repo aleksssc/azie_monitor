@@ -5,6 +5,13 @@ const fs = require("fs");
 const whois = require("whois");
 const net = require("net");
 
+app.whenReady().then(() => {
+
+    initializeDataFiles();
+
+    createWindow();
+
+});
 
 function createWindow() {
 
@@ -36,7 +43,86 @@ function createWindow() {
 
 }
 
-app.whenReady().then(createWindow);
+//Create Json Files
+function initializeDataFiles() {
+
+    // Pasta da aplicação dentro do AppData
+    const dataFolder = path.join(
+        app.getPath("userData"),
+        "data"
+    );
+
+
+    // Cria a pasta caso ainda não exista
+    if (!fs.existsSync(dataFolder)) {
+
+        fs.mkdirSync(dataFolder, {
+            recursive: true
+        });
+
+    }
+
+
+    const files = [
+
+        {
+            name: "servers.json",
+            defaultData: []
+        },
+
+        {
+            name: "groups.json",
+            defaultData: [
+                {
+                    id: "default",
+                    name: "Ungrouped",
+                    description: "Servers without a group",
+                    icon: "fa-server",
+                    color: "#6b7280"
+                }
+            ]
+        },
+
+        {
+            name: "settings.json",
+            defaultData: {
+                theme: "dark",
+                language: "en",
+                refreshInterval: 30000,
+                pingCount: 1
+            }
+        }
+
+    ];
+
+
+    files.forEach(file => {
+
+        const filePath = path.join(
+            dataFolder,
+            file.name
+        );
+
+
+        // Só cria o ficheiro caso ainda não exista
+        if (!fs.existsSync(filePath)) {
+
+            fs.writeFileSync(
+                filePath,
+                JSON.stringify(file.defaultData, null, 4),
+                "utf8"
+            );
+
+            console.log(`Created: ${file.name}`);
+
+        }
+
+    });
+
+
+    return dataFolder;
+
+}
 
 ipcMain.handle("load-page", (event, page) => {
 
@@ -299,22 +385,21 @@ ipcMain.handle("check-online", async (event, target) => {
 
 //Save Json File
 ipcMain.handle("save-server", async (event, newServer) => {
+
     try {
-        const serversPath = getServersPath();
 
-        let servers = [];
+        const serversPath = getDataFilePath("servers.json");
 
-        if (fs.existsSync(serversPath)) {
-            const data = fs.readFileSync(serversPath, "utf-8");
-            servers = JSON.parse(data || "[]");
-        }
+        const data = fs.readFileSync(serversPath, "utf8");
+
+        const servers = JSON.parse(data || "[]");
 
         servers.push(newServer);
 
         fs.writeFileSync(
             serversPath,
-            JSON.stringify(servers, null, 2),
-            "utf-8"
+            JSON.stringify(servers, null, 4),
+            "utf8"
         );
 
         return {
@@ -322,42 +407,50 @@ ipcMain.handle("save-server", async (event, newServer) => {
         };
 
     } catch (error) {
+
         console.error("Erro ao guardar servidor:", error);
 
         return {
             success: false,
             error: error.message
         };
+
     }
+
 });
 
 //Read Json File
 ipcMain.handle("get-servers", async () => {
+
     try {
-        const serversPath = getServersPath();
-        const fileContent = fs.readFileSync(serversPath, "utf8");
+
+        const serversPath = getDataFilePath("servers.json");
+
+        const fileContent = fs.readFileSync(
+            serversPath,
+            "utf8"
+        );
 
         return JSON.parse(fileContent || "[]");
+
     } catch (error) {
+
         console.error("Erro ao carregar servidores:", error);
+
         return [];
+
     }
+
 });
 
-function getServersPath() {
-    const configFolder = path.join(app.getPath("userData"), "config");
-    const serversPath = path.join(configFolder, "servers.json");
+function getDataFilePath(fileName) {
 
+    return path.join(
+        app.getPath("userData"),
+        "data",
+        fileName
+    );
 
-    if (!fs.existsSync(configFolder)) {
-        fs.mkdirSync(configFolder, { recursive: true });
-    }
-
-    if (!fs.existsSync(serversPath)) {
-        fs.writeFileSync(serversPath, "[]", "utf8");
-    }
-
-    return serversPath;
 }
 
 app.on("window-all-closed", () => {
