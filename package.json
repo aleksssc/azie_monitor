@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder --win nsis"
   },
 
   "build": {
@@ -16,7 +16,8 @@
     "productName": "Azie Monitor",
 
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
 
     "files": [
@@ -32,15 +33,17 @@
       "target": [
         "nsis"
       ],
-      "icon": "assets/img/logo.ico"
-    },
+    "icon": "build/icon.ico"
+  },
 
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "installerIcon": "build/icon.ico",
+    "uninstallerIcon": "build/icon.ico"
+  }
   },
 
   "devDependencies": {
