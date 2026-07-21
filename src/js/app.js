@@ -573,6 +573,10 @@ async function initServers() {
                         <span>Ping</span>
                     </button>
 
+                    <button class="server-action-btn edit-btn" title="Editar servidor">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+
                 </div>
 
             </div>
