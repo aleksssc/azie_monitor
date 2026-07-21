@@ -561,6 +561,20 @@ async function initServers() {
 
                 </div>
 
+                <div class="server-actions">
+
+                    <button class="server-action-btn rdp-btn" data-ip="${server.ip}" title="Abrir Remote Desktop">
+                        <i class="fa-solid fa-display"></i>
+                        <span>RDP</span>
+                    </button>
+
+                    <button class="server-action-btn ping-btn" data-ip="${server.ip}" title="Executar Ping">
+                        <i class="fa-solid fa-signal"></i>
+                        <span>Ping</span>
+                    </button>
+
+                </div>
+
             </div>
         `;
 
