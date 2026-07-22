@@ -1,93 +1,469 @@
-<div class="content">
+<section class="dashboard-home">
 
-    <div id="page-content">
+    <div class="dashboard-header">
 
-        <div class="home-header">
+        <div class="dashboard-header-text">
 
-            <div>
+            <span class="dashboard-eyebrow">
+                Dashboard
+            </span>
 
-                <h1>Welcome back, Alexandre 👋</h1>
+            <h1>Welcome back, Alexandre 👋</h1>
 
-                <p>
-                    Manage your infrastructure, tools and servers from one place.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="dashboard-cards">
-
-            <button class="dashboard-card" data-page="servers.html">
-
-                <div class="card-icon">🖥</div>
-
-                <h2>Servers</h2>
-
-                <span>Monitor and manage your infrastructure.</span>
-
-            </button>
-
-            <button class="dashboard-card" data-page="tools.html">
-
-                <div class="card-icon">🛠</div>
-
-                <h2>Tools</h2>
-
-                <span>Access all your utilities and scripts.</span>
-
-            </button>
-
-            <div class="dashboard-card">
-
-                <div class="card-icon">📈</div>
-
-                <h2>Monitoring</h2>
-
-                <span>View system health and performance.</span>
-
-            </div>
-
-            <div class="dashboard-card">
-
-                <div class="card-icon">⚙</div>
-
-                <h2>Settings</h2>
-
-                <span>Configure the application.</span>
-
-            </div>
+            <p>
+                Monitor your servers, groups and infrastructure from one place.
+            </p>
 
         </div>
 
-
-        <div class="home-panel">
-
-            <div class="panel-title">
-
-                <h3>Recent Activity</h3>
-
-            </div>
-
-            <div class="activity-item">
-
-                <span class="status online"></span>
-
-                <span>Welcome to Azie Monitor.</span>
-
-            </div>
-
-            <div class="activity-item">
-
-                <span class="status warning"></span>
-
-                <span>No recent activity available.</span>
-
-            </div>
-
-        </div>
+        <button
+            id="dashboard-refresh"
+            class="dashboard-refresh-btn"
+            type="button"
+        >
+            <i class="fa-solid fa-rotate"></i>
+            <span>Refresh</span>
+        </button>
 
     </div>
 
-</div>
+
+    <!-- OVERVIEW CARDS -->
+
+    <div class="dashboard-overview">
+
+        <article class="overview-card">
+
+            <div class="overview-card-icon servers">
+
+                <i class="fa-solid fa-server"></i>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Total Servers
+                </span>
+
+                <strong id="dashboard-total-servers">
+                    0
+                </strong>
+
+                <small>
+                    Configured infrastructure
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="overview-card">
+
+            <div class="overview-card-icon online">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Online
+                </span>
+
+                <strong id="dashboard-online-servers">
+                    0
+                </strong>
+
+                <small>
+                    Operating normally
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="overview-card">
+
+            <div class="overview-card-icon offline">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Offline
+                </span>
+
+                <strong id="dashboard-offline-servers">
+                    0
+                </strong>
+
+                <small>
+                    Require attention
+                </small>
+
+            </div>
+
+        </article>
+
+
+        <article class="overview-card">
+
+            <div class="overview-card-icon groups">
+
+                <i class="fa-solid fa-layer-group"></i>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Groups
+                </span>
+
+                <strong id="dashboard-total-groups">
+                    0
+                </strong>
+
+                <small>
+                    Infrastructure groups
+                </small>
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+    <!-- HEALTH AND QUICK ACTIONS -->
+
+    <div class="dashboard-main-grid">
+
+        <section class="dashboard-panel health-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        Live Status
+                    </span>
+
+                    <h2>Infrastructure Health</h2>
+
+                </div>
+
+                <span
+                    id="dashboard-health-status"
+                    class="health-badge checking"
+                >
+                    Checking
+                </span>
+
+            </div>
+
+
+            <div class="health-content">
+
+                <div
+                    id="dashboard-health-chart"
+                    class="health-chart"
+                >
+
+                    <div class="health-chart-inner">
+
+                        <strong id="dashboard-health-percentage">
+                            0%
+                        </strong>
+
+                        <span>
+                            Online
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="health-details">
+
+                    <div class="health-detail-row">
+
+                        <div>
+
+                            <span class="health-dot online"></span>
+
+                            <span>Online servers</span>
+
+                        </div>
+
+                        <strong id="dashboard-health-online">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="health-detail-row">
+
+                        <div>
+
+                            <span class="health-dot offline"></span>
+
+                            <span>Offline servers</span>
+
+                        </div>
+
+                        <strong id="dashboard-health-offline">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="health-detail-row">
+
+                        <div>
+
+                            <i class="fa-regular fa-clock"></i>
+
+                            <span>Last updated</span>
+
+                        </div>
+
+                        <strong id="dashboard-last-update">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="dashboard-panel quick-actions-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        Shortcuts
+                    </span>
+
+                    <h2>Quick Actions</h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="quick-actions-grid">
+
+                <button
+                    class="quick-action"
+                    data-page="servers/add_server.html"
+                    type="button"
+                >
+
+                    <div class="quick-action-icon">
+
+                        <i class="fa-solid fa-plus"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>Add Server</strong>
+
+                        <span>Create a new server</span>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </button>
+
+
+                <button
+                    class="quick-action"
+                    data-page="servers/manage_groups.html"
+                    type="button"
+                >
+
+                    <div class="quick-action-icon">
+
+                        <i class="fa-solid fa-layer-group"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>Manage Groups</strong>
+
+                        <span>Organize infrastructure</span>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </button>
+
+
+                <button
+                    class="quick-action"
+                    data-page="tools/ping.html"
+                    type="button"
+                >
+
+                    <div class="quick-action-icon">
+
+                        <i class="fa-solid fa-satellite-dish"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>Ping Tool</strong>
+
+                        <span>Test host connectivity</span>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </button>
+
+
+                <button
+                    class="quick-action"
+                    data-page="servers.html"
+                    type="button"
+                >
+
+                    <div class="quick-action-icon">
+
+                        <i class="fa-solid fa-server"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>View Servers</strong>
+
+                        <span>Open infrastructure list</span>
+
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- OFFLINE SERVERS -->
+
+    <section class="dashboard-panel attention-panel">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+
+                <span class="panel-eyebrow">
+                    Alerts
+                </span>
+
+                <h2>Servers Requiring Attention</h2>
+
+            </div>
+
+            <span
+                id="dashboard-attention-count"
+                class="attention-count"
+            >
+                0 servers
+            </span>
+
+        </div>
+
+
+        <div
+            id="dashboard-offline-list"
+            class="dashboard-server-list"
+        >
+
+            <div class="dashboard-empty-state">
+
+                <i class="fa-solid fa-spinner fa-spin"></i>
+
+                <span>Checking server status...</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- GROUPS -->
+
+    <section class="dashboard-panel groups-panel">
+
+        <div class="dashboard-panel-header">
+
+            <div>
+
+                <span class="panel-eyebrow">
+                    Organization
+                </span>
+
+                <h2>Server Groups</h2>
+
+            </div>
+
+            <button
+                class="panel-link-button"
+                data-page="servers/manage_groups.html"
+                type="button"
+            >
+                Manage Groups
+
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+        </div>
+
+
+        <div
+            id="dashboard-groups-list"
+            class="dashboard-groups-list"
+        >
+
+            <div class="dashboard-empty-state">
+
+                <i class="fa-solid fa-spinner fa-spin"></i>
+
+                <span>Loading groups...</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</section>

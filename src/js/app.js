@@ -183,9 +183,875 @@ function bindNavigation(container = document) {
 
 }
 
+function createDashboardGroups(servers) {
+
+    const groupsMap =
+        new Map();
+
+
+    servers.forEach(server => {
+
+        const groupName =
+            getDashboardGroupName(
+                server
+            );
+
+
+        if (!groupsMap.has(groupName)) {
+
+            groupsMap.set(
+                groupName,
+                {
+                    name: groupName,
+                    total: 0,
+                    online: 0,
+                    offline: 0
+                }
+            );
+        }
+
+
+        const group =
+            groupsMap.get(groupName);
+
+
+        group.total++;
+
+
+        if (server.online) {
+
+            group.online++;
+
+        } else {
+
+            group.offline++;
+        }
+
+    });
+
+
+    return Array.from(
+        groupsMap.values()
+    ).sort((first, second) => {
+
+        return first.name.localeCompare(
+            second.name
+        );
+
+    });
+
+}
+
 function initHome() {
 
- bindNavigation();
+    bindNavigation();
+
+    const refreshButton =
+        document.getElementById("dashboard-refresh");
+
+    if (refreshButton) {
+
+        refreshButton.addEventListener(
+            "click",
+            loadHomeDashboard
+        );
+    }
+
+    loadHomeDashboard();
+
+}
+
+// Load Dashboard
+async function loadHomeDashboard() {
+
+    const refreshButton =
+        document.getElementById("dashboard-refresh");
+
+    if (refreshButton) {
+
+        refreshButton.disabled = true;
+        refreshButton.classList.add("is-loading");
+    }
+
+
+    setDashboardHealthStatus(
+        "Checking",
+        "checking"
+    );
+
+
+    try {
+
+        const servers =
+            await getDashboardServers();
+
+
+        const checkedServers =
+            await Promise.all(
+
+                servers.map(async (server) => {
+
+                    try {
+
+                        const online =
+                            await checkDashboardServerStatus(
+                                server
+                            );
+
+                        return {
+                            ...server,
+                            online
+                        };
+
+                    } catch (error) {
+
+                        console.error(
+                            `Dashboard status error for ${server.name}:`,
+                            error
+                        );
+
+                        return {
+                            ...server,
+                            online: false
+                        };
+                    }
+
+                })
+
+            );
+
+
+        renderHomeDashboard(
+            checkedServers
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error loading dashboard:",
+            error
+        );
+
+        renderHomeDashboard([]);
+
+    } finally {
+
+        if (refreshButton) {
+
+            refreshButton.disabled = false;
+            refreshButton.classList.remove(
+                "is-loading"
+            );
+        }
+
+    }
+
+}
+
+// Load Servers to dashboard
+async function getDashboardServers() {
+
+    const api = window.api || {};
+
+
+    const serverLoader =
+        api.getServers ||
+        api.loadServers ||
+        api.readServers;
+
+
+    if (!serverLoader) {
+
+        throw new Error(
+            "No server loading method was found in window.api."
+        );
+    }
+
+
+    const result =
+        await serverLoader.call(api);
+
+
+    if (Array.isArray(result)) {
+
+        return result;
+    }
+
+
+    if (Array.isArray(result?.servers)) {
+
+        return result.servers;
+    }
+
+
+    return [];
+
+}
+
+async function checkDashboardServerStatus(server) {
+
+    const ip = String(server.ip || "").trim();
+
+    if (!ip) {
+
+        console.error(
+            "Servidor sem IP:",
+            server
+        );
+
+        return false;
+    }
+
+
+    if (
+        !window.api ||
+        typeof window.api.checkOnline !== "function"
+    ) {
+
+        console.error(
+            "window.api.checkOnline não está disponível."
+        );
+
+        return false;
+    }
+
+
+    try {
+
+        const isOnline =
+            await window.api.checkOnline(ip);
+
+        console.log(
+            `Dashboard ping ${server.name} (${ip}):`,
+            isOnline
+        );
+
+        return isOnline === true;
+
+    } catch (error) {
+
+        console.error(
+            `Erro ao verificar ${server.name} (${ip}):`,
+            error
+        );
+
+        return false;
+    }
+
+}
+
+function normalizeDashboardStatus(result) {
+
+    if (typeof result === "boolean") {
+
+        return result;
+    }
+
+
+    if (
+        result &&
+        typeof result.online === "boolean"
+    ) {
+
+        return result.online;
+    }
+
+
+    if (
+        result &&
+        typeof result.isOnline === "boolean"
+    ) {
+
+        return result.isOnline;
+    }
+
+
+    if (
+        result &&
+        typeof result.success === "boolean"
+    ) {
+
+        return result.success;
+    }
+
+
+    const statusText = String(
+
+        result?.status ??
+        result?.output ??
+        result ??
+        ""
+
+    ).toLowerCase();
+
+
+    return (
+        statusText === "online" ||
+        statusText === "true" ||
+        statusText.includes("ttl=") ||
+        statusText.includes("reply from") ||
+        statusText.includes("bytes from")
+    );
+
+}
+
+function renderHomeDashboard(servers) {
+
+    const totalServers =
+        servers.length;
+
+    const onlineServers =
+        servers.filter(
+            server => server.online
+        );
+
+    const offlineServers =
+        servers.filter(
+            server => !server.online
+        );
+
+    const groups =
+        createDashboardGroups(
+            servers
+        );
+
+    const percentage =
+        totalServers > 0
+            ? Math.round(
+                onlineServers.length /
+                totalServers *
+                100
+            )
+            : 0;
+
+
+    setDashboardText(
+        "dashboard-total-servers",
+        totalServers
+    );
+
+    setDashboardText(
+        "dashboard-online-servers",
+        onlineServers.length
+    );
+
+    setDashboardText(
+        "dashboard-offline-servers",
+        offlineServers.length
+    );
+
+    setDashboardText(
+        "dashboard-total-groups",
+        groups.length
+    );
+
+    setDashboardText(
+        "dashboard-health-online",
+        onlineServers.length
+    );
+
+    setDashboardText(
+        "dashboard-health-offline",
+        offlineServers.length
+    );
+
+    setDashboardText(
+        "dashboard-health-percentage",
+        `${percentage}%`
+    );
+
+
+    const updateTime =
+        new Date().toLocaleTimeString(
+            "pt-PT",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+
+    setDashboardText(
+        "dashboard-last-update",
+        updateTime
+    );
+
+
+    updateDashboardHealthChart(
+        percentage,
+        totalServers
+    );
+
+    renderDashboardOfflineServers(
+        offlineServers
+    );
+
+    renderDashboardGroups(
+        groups
+    );
+
+}
+
+function updateDashboardHealthChart(
+    percentage,
+    totalServers
+) {
+
+    const chart =
+        document.getElementById(
+            "dashboard-health-chart"
+        );
+
+
+    if (chart) {
+
+        chart.style.setProperty(
+            "--health-value",
+            percentage
+        );
+
+
+        let chartColor = "#ef4444";
+
+
+        if (percentage >= 90) {
+
+            chartColor = "#10b981";
+
+        } else if (percentage >= 60) {
+
+            chartColor = "#f59e0b";
+        }
+
+
+        chart.style.setProperty(
+            "--health-color",
+            chartColor
+        );
+    }
+
+
+    if (totalServers === 0) {
+
+        setDashboardHealthStatus(
+            "No servers",
+            "checking"
+        );
+
+        return;
+    }
+
+
+    if (percentage === 100) {
+
+        setDashboardHealthStatus(
+            "All systems operational",
+            "healthy"
+        );
+
+        return;
+    }
+
+
+    if (percentage >= 75) {
+
+        setDashboardHealthStatus(
+            "Infrastructure stable",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    setDashboardHealthStatus(
+        "Attention required",
+        "critical"
+    );
+
+}
+
+function setDashboardHealthStatus(
+    text,
+    statusClass
+) {
+
+    const badge =
+        document.getElementById(
+            "dashboard-health-status"
+        );
+
+
+    if (!badge) {
+
+        return;
+    }
+
+
+    badge.textContent = text;
+
+    badge.className =
+        `health-badge ${statusClass}`;
+
+}
+
+function renderDashboardOfflineServers(
+    servers
+) {
+
+    const container =
+        document.getElementById(
+            "dashboard-offline-list"
+        );
+
+    const count =
+        document.getElementById(
+            "dashboard-attention-count"
+        );
+
+
+    if (!container) {
+
+        return;
+    }
+
+
+    if (count) {
+
+        count.textContent =
+            `${servers.length} ${
+                servers.length === 1
+                    ? "server"
+                    : "servers"
+            }`;
+    }
+
+
+    if (servers.length === 0) {
+
+        container.innerHTML = `
+
+            <div class="dashboard-empty-state success">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <span>
+                    All configured servers are online.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        servers.map(server => {
+
+            const name =
+                escapeDashboardHtml(
+                    server.name ||
+                    "Unnamed Server"
+                );
+
+            const ip =
+                escapeDashboardHtml(
+                    server.ip ||
+                    "No IP address"
+                );
+
+            const group =
+                escapeDashboardHtml(
+                    getDashboardGroupName(
+                        server
+                    )
+                );
+
+
+            return `
+
+                <div class="dashboard-server-row">
+
+                    <div class="dashboard-server-identity">
+
+                        <div class="dashboard-server-icon">
+
+                            <i class="fa-solid fa-server"></i>
+
+                        </div>
+
+                        <div class="dashboard-server-name">
+
+                            <strong>${name}</strong>
+
+                            <span>${group}</span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="dashboard-server-ip">
+
+                        ${ip}
+
+                    </span>
+
+
+                    <span class="dashboard-server-status">
+
+                        Offline
+
+                    </span>
+
+
+                    <div class="dashboard-server-actions">
+
+                        <button
+                            class="server-ping-btn"
+                            data-ip="${ip}"
+                            type="button"
+                            title="Ping server"
+                        >
+                            <i class="fa-solid fa-satellite-dish"></i>
+                        </button>
+
+                        <button
+                            class="server-rdp-btn"
+                            data-ip="${ip}"
+                            type="button"
+                            title="Open RDP"
+                        >
+                            <i class="fa-solid fa-desktop"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+
+}
+
+function createDashboardGroups(servers) {
+
+    const groupsMap =
+        new Map();
+
+
+    servers.forEach(server => {
+
+        const groupName =
+            getDashboardGroupName(
+                server
+            );
+
+
+        if (!groupsMap.has(groupName)) {
+
+            groupsMap.set(
+                groupName,
+                {
+                    name: groupName,
+                    total: 0,
+                    online: 0,
+                    offline: 0
+                }
+            );
+        }
+
+
+        const group =
+            groupsMap.get(groupName);
+
+
+        group.total++;
+
+
+        if (server.online) {
+
+            group.online++;
+
+        } else {
+
+            group.offline++;
+        }
+
+    });
+
+
+    return Array.from(
+        groupsMap.values()
+    ).sort((first, second) => {
+
+        return first.name.localeCompare(
+            second.name
+        );
+
+    });
+
+}
+
+function renderDashboardGroups(groups) {
+
+    const container =
+        document.getElementById(
+            "dashboard-groups-list"
+        );
+
+
+    if (!container) {
+
+        return;
+    }
+
+
+    if (groups.length === 0) {
+
+        container.innerHTML = `
+
+            <div class="dashboard-empty-state">
+
+                <i class="fa-solid fa-layer-group"></i>
+
+                <span>
+                    No server groups configured.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        groups.map(group => {
+
+            const percentage =
+                group.total > 0
+                    ? Math.round(
+                        group.online /
+                        group.total *
+                        100
+                    )
+                    : 0;
+
+
+            return `
+
+                <article class="dashboard-group-card">
+
+                    <div class="dashboard-group-header">
+
+                        <div class="dashboard-group-title">
+
+                            <i class="fa-solid fa-folder"></i>
+
+                            <strong>
+                                ${escapeDashboardHtml(group.name)}
+                            </strong>
+
+                        </div>
+
+                        <span class="dashboard-group-count">
+
+                            ${group.total}
+                            ${
+                                group.total === 1
+                                    ? "server"
+                                    : "servers"
+                            }
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-group-progress">
+
+                        <div
+                            class="dashboard-group-progress-bar"
+                            style="width: ${percentage}%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="dashboard-group-footer">
+
+                        <span>
+                            ${group.online} online
+                        </span>
+
+                        <strong>
+                            ${percentage}%
+                        </strong>
+
+                    </div>
+
+                </article>
+
+            `;
+
+        }).join("");
+
+}
+
+function getDashboardGroupName(server) {
+
+    if (
+        server.group &&
+        typeof server.group === "object"
+    ) {
+
+        return (
+            server.group.name ||
+            "Ungrouped"
+        );
+    }
+
+
+    return (
+        server.groupName ||
+        server.group ||
+        "Ungrouped"
+    );
+
+}
+
+function setDashboardText(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (element) {
+
+        element.textContent = value;
+    }
+
+}
+
+function escapeDashboardHtml(value) {
+
+    return String(value)
+
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
 }
 
