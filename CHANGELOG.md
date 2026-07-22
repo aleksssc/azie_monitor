@@ -20,4 +20,3 @@ All notable changes to this project will be documented in this file.
 ### 🐞 Fixed
 - Fixed page loading conflicts.
 - Fixed server status refresh.
-- Fixed server page rendering.
