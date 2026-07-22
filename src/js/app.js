@@ -19,6 +19,17 @@ window.addEventListener("load", () => {
     }, 1500); // 3 segundos
 
 });
+
+async function initAbout() {
+
+    const version =
+        await window.api.getAppVersion();
+
+    document.getElementById("app-version").textContent =
+        `Version ${version}`;
+
+}
+
 // Load page
 async function loadPage(page, data=null) {
 

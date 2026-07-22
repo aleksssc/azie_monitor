@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld("api", {
     // Menu
     loadPage: (page) => ipcRenderer.invoke("load-page", page),
 
+    getAppVersion: () => ipcRenderer.invoke("get-app-version"),
+
     // Tools
     runTool: (tool) => ipcRenderer.invoke("run-tool", tool),
 

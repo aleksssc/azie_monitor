@@ -5,12 +5,19 @@ const fs = require("fs");
 const whois = require("whois");
 const net = require("net");
 const crypto = require("crypto");
+const packageJson = require("./package.json");
 
 app.whenReady().then(() => {
 
     initializeDataFiles();
 
     createWindow();
+
+});
+
+ipcMain.handle("get-app-version", () => {
+
+    return packageJson.version;
 
 });
 
