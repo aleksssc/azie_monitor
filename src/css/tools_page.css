@@ -1,128 +1,186 @@
-/* ========================= */
-/* TOOLS PAGES */
-/* ========================= */
+/* ======================================================
+   TOOLS PAGE
+====================================================== */
 
-.tool-page{
+.tool-page {
+    --tool-surface: #0b1320;
+    --tool-field: #101a29;
+    --tool-field-hover: #132033;
+    --tool-border: #26364d;
 
-    max-width:900px;
-    width:100%;
+    width: 100%;
+    max-width: 850px;
 
-    animation:fadeIn .3s ease;
-}
-
-.tool-page h1{
-
-    font-size:38px;
-    font-weight:700;
-
-    margin-bottom:10px;
-}
-
-.tool-page p{
-
-    color:#9ca3af;
-
-    margin-bottom:35px;
-
-    font-size:16px;
+    animation: fadeIn 0.25s ease;
 }
 
 
-/* ========================= */
-/* INPUTS */
-/* ========================= */
+/* ======================================================
+   TOOL HEADER
+====================================================== */
 
-.input-group{
+.tool-page h1 {
+    margin: 0 0 7px;
 
-    display:flex;
-    flex-direction:column;
+    color: var(--text);
 
-    gap:10px;
-
-    margin-bottom:25px;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.15;
 }
 
-.input-group label{
+.tool-page > p {
+    margin: 0 0 28px;
 
-    color:#d1d5db;
+    color: var(--text-secondary);
 
-    font-size:14px;
-    font-weight:600;
-}
-
-.input-group input{
-
-    width:100%;
-
-    padding:16px 18px;
-
-    background:#1f2329;
-
-    border:1px solid #313640;
-
-    border-radius:12px;
-
-    color:#fff;
-
-    font-size:15px;
-
-    outline:none;
-
-    transition:.25s;
-}
-
-.input-group input:focus{
-
-    border-color:#3b82f6;
-
-    box-shadow:0 0 0 4px rgba(59,130,246,.15);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 
-/* ========================= */
-/* PORT RANGE */
-/* ========================= */
+/* ======================================================
+   TOOL FORM
+====================================================== */
 
-.port-range{
+.tool-page .tool-form,
+.tool-page .form-card {
+    padding: 25px;
 
-    display:grid;
+    background: var(--tool-surface);
+    border: 1px solid var(--tool-border);
+    border-radius: 8px;
 
-    grid-template-columns:repeat(2, 1fr);
-
-    gap:12px;
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.015);
 }
 
-/* ========================= */
-/* BUTTONS */
-/* ========================= */
+
+/* ======================================================
+   TOOL INPUTS
+====================================================== */
+
+.tool-page .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-bottom: 22px;
+}
+
+.tool-page .input-group:last-of-type {
+    margin-bottom: 18px;
+}
+
+.tool-page .input-group label {
+    color: #dbe6f5;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tool-page .input-group input,
+.tool-page .input-group textarea,
+.tool-page .input-group select {
+    width: 100%;
+    min-height: 42px;
+
+    padding: 11px 14px;
+
+    color: var(--text);
+
+    background: var(--tool-field);
+    border: 1px solid var(--tool-border);
+    border-radius: 7px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.tool-page .input-group input::placeholder,
+.tool-page .input-group textarea::placeholder {
+    color: #7f8fa6;
+}
+
+.tool-page .input-group input:hover,
+.tool-page .input-group textarea:hover,
+.tool-page .input-group select:hover {
+    background: var(--tool-field-hover);
+
+    border-color: #38506f;
+}
+
+.tool-page .input-group input:focus,
+.tool-page .input-group textarea:focus,
+.tool-page .input-group select:focus {
+    background: var(--tool-field-hover);
+
+    border-color: var(--primary);
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+
+/* ======================================================
+   PORT RANGE
+====================================================== */
+
+.tool-page .port-range {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+/* ======================================================
+   TOOL BUTTONS
+====================================================== */
 
 #run-ping,
 #run-traceroute,
 #run-dnslookup,
 #run-whois,
 #run-portscan,
-#run-rdp{
+#run-rdp {
+    min-height: 40px;
 
-    padding:14px 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
-    background:linear-gradient(
-        135deg,
-        #3b82f6,
-        #2563eb
-    );
+    padding: 0 18px;
 
-    border:none;
+    color: #ffffff;
 
-    border-radius:12px;
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 7px;
 
-    color:white;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
 
-    font-size:15px;
-    font-weight:600;
+    cursor: pointer;
 
-    cursor:pointer;
-
-    transition:.25s;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 #run-ping:hover,
@@ -130,11 +188,13 @@
 #run-dnslookup:hover,
 #run-whois:hover,
 #run-portscan:hover,
-#run-rdp:hover{
+#run-rdp:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
 
-    transform:translateY(-2px);
+    transform: translateY(-1px);
 
-    box-shadow:0 12px 25px rgba(59,130,246,.25);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
 }
 
 #run-ping:active,
@@ -142,9 +202,8 @@
 #run-dnslookup:active,
 #run-whois:active,
 #run-portscan:active,
-#run-rdp:active{
-
-    transform:scale(.98);
+#run-rdp:active {
+    transform: scale(0.97);
 }
 
 #run-ping:disabled,
@@ -152,52 +211,48 @@
 #run-dnslookup:disabled,
 #run-whois:disabled,
 #run-portscan:disabled,
-#run-rdp:disabled{
+#run-rdp:disabled {
+    opacity: 0.55;
 
-    opacity:.65;
+    cursor: not-allowed;
 
-    cursor:not-allowed;
-
-    transform:none;
-
-    box-shadow:none;
+    transform: none;
+    box-shadow: none;
 }
 
 
-/* ========================= */
-/* TERMINAL OUTPUT */
-/* ========================= */
+/* ======================================================
+   TERMINAL OUTPUT
+====================================================== */
 
 #terminal-output,
 #traceroute-output,
 #dnslookup-output,
 #whois-output,
 #portscan-output,
-#rdp-output{
+#rdp-output {
+    width: 100%;
+    min-height: 250px;
+    max-height: 500px;
 
-    margin-top:35px;
+    margin-top: 25px;
+    padding: 18px;
 
-    min-height:300px;
+    color: #4ade80;
 
-    background:#16191d;
+    background: #080e17;
+    border: 1px solid var(--tool-border);
+    border-radius: 8px;
 
-    border:1px solid #2b3138;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.65;
 
-    border-radius:14px;
+    white-space: pre-wrap;
+    overflow: auto;
 
-    padding:20px;
-
-    color:#4ade80;
-
-    font-family:Consolas, monospace;
-
-    font-size:14px;
-
-    line-height:1.6;
-
-    white-space:pre-wrap;
-
-    overflow:auto;
+    box-shadow:
+        inset 0 1px 8px rgba(0, 0, 0, 0.25);
 }
 
 #terminal-output:empty,
@@ -205,42 +260,113 @@
 #dnslookup-output:empty,
 #whois-output:empty,
 #portscan-output:empty,
-#rdp-output:empty{
-    display:none;
-}
-
-/* ========================= */
-/* MOBILE */
-/* ========================= */
-
-@media(max-width:600px){
-
-    .port-range{
-
-        grid-template-columns:1fr;
-    }
-
+#rdp-output:empty {
+    display: none;
 }
 
 
-/* ========================= */
-/* ANIMATION */
-/* ========================= */
+/* ======================================================
+   TERMINAL SCROLLBAR
+====================================================== */
 
-@keyframes fadeIn{
+#terminal-output::-webkit-scrollbar,
+#traceroute-output::-webkit-scrollbar,
+#dnslookup-output::-webkit-scrollbar,
+#whois-output::-webkit-scrollbar,
+#portscan-output::-webkit-scrollbar,
+#rdp-output::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
 
-    from{
+#terminal-output::-webkit-scrollbar-track,
+#traceroute-output::-webkit-scrollbar-track,
+#dnslookup-output::-webkit-scrollbar-track,
+#whois-output::-webkit-scrollbar-track,
+#portscan-output::-webkit-scrollbar-track,
+#rdp-output::-webkit-scrollbar-track {
+    background: transparent;
+}
 
-        opacity:0;
+#terminal-output::-webkit-scrollbar-thumb,
+#traceroute-output::-webkit-scrollbar-thumb,
+#dnslookup-output::-webkit-scrollbar-thumb,
+#whois-output::-webkit-scrollbar-thumb,
+#portscan-output::-webkit-scrollbar-thumb,
+#rdp-output::-webkit-scrollbar-thumb {
+    background: #2a3b53;
 
-        transform:translateY(15px);
+    border-radius: 10px;
+}
+
+#terminal-output::-webkit-scrollbar-thumb:hover,
+#traceroute-output::-webkit-scrollbar-thumb:hover,
+#dnslookup-output::-webkit-scrollbar-thumb:hover,
+#whois-output::-webkit-scrollbar-thumb:hover,
+#portscan-output::-webkit-scrollbar-thumb:hover,
+#rdp-output::-webkit-scrollbar-thumb:hover {
+    background: #38506f;
+}
+
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
+
+@media (max-width: 600px) {
+
+    .tool-page h1 {
+        font-size: 28px;
     }
 
-    to{
-
-        opacity:1;
-
-        transform:translateY(0);
+    .tool-page .tool-form,
+    .tool-page .form-card {
+        padding: 20px;
     }
 
+    .tool-page .port-range {
+        grid-template-columns: 1fr;
+    }
+
+    #run-ping,
+    #run-traceroute,
+    #run-dnslookup,
+    #run-whois,
+    #run-portscan,
+    #run-rdp {
+        width: 100%;
+    }
+
+    #terminal-output,
+    #traceroute-output,
+    #dnslookup-output,
+    #whois-output,
+    #portscan-output,
+    #rdp-output {
+        min-height: 220px;
+
+        padding: 15px;
+
+        font-size: 12px;
+    }
+}
+
+
+/* ======================================================
+   ANIMATION
+====================================================== */
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform: translateY(0);
+    }
 }

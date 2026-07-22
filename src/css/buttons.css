@@ -1,0 +1,162 @@
+/* ======================================================
+   GLOBAL PRIMARY BUTTONS
+   Carregar este ficheiro DEPOIS dos restantes CSS.
+====================================================== */
+
+/*
+   Unifica os botões:
+   - Add Server
+   - Add Group
+   - Save Group
+   - Save Server
+*/
+
+.primary-btn,
+.add-server-btn,
+.add-group-btn,
+.save-group-btn,
+.save-server-btn,
+#add-server,
+#add-group,
+#save-group,
+#save-server {
+    box-sizing: border-box !important;
+
+    min-width: 122px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 8px !important;
+
+    padding: 0 17px !important;
+
+    color: #ffffff !important;
+    background: var(--primary, #3b82f6) !important;
+
+    border: 1px solid var(--primary, #3b82f6) !important;
+    border-radius: 7px !important;
+
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+
+    text-align: center !important;
+    white-space: nowrap !important;
+
+    appearance: none !important;
+    -webkit-appearance: none !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* ÍCONES COM A MESMA LARGURA */
+
+.primary-btn i,
+.add-server-btn i,
+.add-group-btn i,
+.save-group-btn i,
+.save-server-btn i,
+#add-server i,
+#add-group i,
+#save-group i,
+#save-server i {
+    width: 13px !important;
+    min-width: 13px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+
+
+/* HOVER */
+
+.primary-btn:hover,
+.add-server-btn:hover,
+.add-group-btn:hover,
+.save-group-btn:hover,
+.save-server-btn:hover,
+#add-server:hover,
+#add-group:hover,
+#save-group:hover,
+#save-server:hover {
+    color: #ffffff !important;
+
+    background: var(--primary-hover, #2563eb) !important;
+    border-color: var(--primary-hover, #2563eb) !important;
+
+    transform: translateY(-1px) !important;
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.22) !important;
+}
+
+
+/* ACTIVE */
+
+.primary-btn:active,
+.add-server-btn:active,
+.add-group-btn:active,
+.save-group-btn:active,
+.save-server-btn:active,
+#add-server:active,
+#add-group:active,
+#save-group:active,
+#save-server:active {
+    transform: scale(0.97) !important;
+
+    box-shadow: none !important;
+}
+
+
+/* DISABLED */
+
+.primary-btn:disabled,
+.add-server-btn:disabled,
+.add-group-btn:disabled,
+.save-group-btn:disabled,
+.save-server-btn:disabled,
+#add-server:disabled,
+#add-group:disabled,
+#save-group:disabled,
+#save-server:disabled {
+    opacity: 0.55 !important;
+
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+/* RESPONSIVO */
+
+@media (max-width: 750px) {
+    .page-header-actions .primary-btn,
+    .page-header-actions .add-server-btn,
+    .page-header-actions .add-group-btn,
+    .form-buttons .primary-btn,
+    .form-buttons .save-group-btn,
+    .form-buttons .save-server-btn {
+        width: 100% !important;
+    }
+}

@@ -12,6 +12,148 @@
     width: 100%;
 }
 
+/* ========================= */
+/* DASHBOARD ENTRANCE */
+/* ========================= */
+
+@keyframes dashboardRise {
+
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/*
+   Entrada faseada da dashboard.
+   O modo "backwards" mantém cada elemento escondido durante o delay,
+   mas liberta o transform no fim para os efeitos hover continuarem a funcionar.
+*/
+
+.dashboard-header,
+.dashboard-overview .overview-card,
+.dashboard-main-grid > .dashboard-panel,
+.dashboard-home > .dashboard-panel {
+    animation-name: dashboardRise;
+    animation-duration: 0.48s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: backwards;
+}
+
+
+/* Header */
+
+.dashboard-header {
+    animation-delay: 0.04s;
+}
+
+
+/* Overview cards */
+
+.dashboard-overview .overview-card:nth-child(1) {
+    animation-delay: 0.10s;
+}
+
+.dashboard-overview .overview-card:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.dashboard-overview .overview-card:nth-child(3) {
+    animation-delay: 0.22s;
+}
+
+.dashboard-overview .overview-card:nth-child(4) {
+    animation-delay: 0.28s;
+}
+
+
+/* Main panels */
+
+.dashboard-main-grid > .dashboard-panel:nth-child(1) {
+    animation-delay: 0.34s;
+}
+
+.dashboard-main-grid > .dashboard-panel:nth-child(2) {
+    animation-delay: 0.40s;
+}
+
+
+/* Outros painéis que sejam filhos diretos da dashboard */
+
+.dashboard-home > .dashboard-panel:nth-of-type(1) {
+    animation-delay: 0.46s;
+}
+
+.dashboard-home > .dashboard-panel:nth-of-type(2) {
+    animation-delay: 0.52s;
+}
+
+.dashboard-home > .dashboard-panel:nth-of-type(3) {
+    animation-delay: 0.58s;
+}
+
+
+/* Entrada suave dos elementos internos */
+
+.quick-actions-grid .quick-action,
+.dashboard-server-list .dashboard-server-row,
+.dashboard-groups-list .dashboard-group-card {
+    animation: dashboardRise 0.38s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        backwards;
+}
+
+.quick-actions-grid .quick-action:nth-child(1),
+.dashboard-server-list .dashboard-server-row:nth-child(1),
+.dashboard-groups-list .dashboard-group-card:nth-child(1) {
+    animation-delay: 0.48s;
+}
+
+.quick-actions-grid .quick-action:nth-child(2),
+.dashboard-server-list .dashboard-server-row:nth-child(2),
+.dashboard-groups-list .dashboard-group-card:nth-child(2) {
+    animation-delay: 0.54s;
+}
+
+.quick-actions-grid .quick-action:nth-child(3),
+.dashboard-server-list .dashboard-server-row:nth-child(3),
+.dashboard-groups-list .dashboard-group-card:nth-child(3) {
+    animation-delay: 0.60s;
+}
+
+.quick-actions-grid .quick-action:nth-child(4),
+.dashboard-server-list .dashboard-server-row:nth-child(4),
+.dashboard-groups-list .dashboard-group-card:nth-child(4) {
+    animation-delay: 0.66s;
+}
+
+.quick-actions-grid .quick-action:nth-child(n + 5),
+.dashboard-server-list .dashboard-server-row:nth-child(n + 5),
+.dashboard-groups-list .dashboard-group-card:nth-child(n + 5) {
+    animation-delay: 0.72s;
+}
+
+
+/* Respeita a preferência de redução de movimento */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .dashboard-header,
+    .dashboard-overview .overview-card,
+    .dashboard-main-grid > .dashboard-panel,
+    .dashboard-home > .dashboard-panel,
+    .quick-actions-grid .quick-action,
+    .dashboard-server-list .dashboard-server-row,
+    .dashboard-groups-list .dashboard-group-card {
+        animation: none;
+    }
+}
 
 /* ======================================================
    HEADER

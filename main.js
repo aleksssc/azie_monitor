@@ -83,7 +83,7 @@ function createWindow() {
 
     win.loadFile(path.join(__dirname, "src", "views", "index.html"));
 
-    win.webContents.openDevTools();
+    //win.webContents.openDevTools();
 
 }
 

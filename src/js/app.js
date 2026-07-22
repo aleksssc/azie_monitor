@@ -843,29 +843,6 @@ function renderDashboardOfflineServers(
 
                     </span>
 
-
-                    <div class="dashboard-server-actions">
-
-                        <button
-                            class="server-ping-btn"
-                            data-ip="${ip}"
-                            type="button"
-                            title="Ping server"
-                        >
-                            <i class="fa-solid fa-satellite-dish"></i>
-                        </button>
-
-                        <button
-                            class="server-rdp-btn"
-                            data-ip="${ip}"
-                            type="button"
-                            title="Open RDP"
-                        >
-                            <i class="fa-solid fa-desktop"></i>
-                        </button>
-
-                    </div>
-
                 </div>
 
             `;
