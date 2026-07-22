@@ -459,6 +459,162 @@ ipcMain.handle("save-server", async (event, newServer) => {
 
 });
 
+// Update Servers
+ipcMain.handle("update-server",async (event, serverId, serverData) => {
+
+        try {
+
+            const serversPath =
+                getDataFilePath("servers.json");
+
+            const fileContent =
+                fs.readFileSync(
+                    serversPath,
+                    "utf8"
+                );
+
+            const servers =
+                JSON.parse(
+                    fileContent || "[]"
+                );
+
+            const serverIndex =
+                servers.findIndex(
+                    server =>
+                        server.id === serverId
+                );
+
+            if (serverIndex === -1) {
+
+                throw new Error(
+                    `Servidor não encontrado: ${serverId}`
+                );
+
+            }
+
+            servers[serverIndex] = {
+
+                ...servers[serverIndex],
+
+                name: String(
+                    serverData.name || ""
+                ).trim(),
+
+                ip: String(
+                    serverData.ip || ""
+                ).trim(),
+
+                description: String(
+                    serverData.description || ""
+                ).trim(),
+
+                os:
+                    serverData.os ||
+                    servers[serverIndex].os,
+
+                id:
+                    servers[serverIndex].id,
+
+                groupId:
+                    servers[serverIndex].groupId ||
+                    "default"
+
+            };
+
+            if (
+                !servers[serverIndex].name ||
+                !servers[serverIndex].ip
+            ) {
+
+                throw new Error(
+                    "Server name and IP are required."
+                );
+
+            }
+
+            fs.writeFileSync(
+                serversPath,
+                JSON.stringify(
+                    servers,
+                    null,
+                    4
+                ),
+                "utf8"
+            );
+
+            return {
+
+                success: true,
+
+                server:
+                    servers[serverIndex]
+
+            };
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao atualizar servidor:",
+                error
+            );
+
+            return {
+
+                success: false,
+
+                error: error.message
+
+            };
+
+        }
+
+    }
+);
+
+// Delete Server
+ipcMain.handle("delete-server",async (event, serverId) => {
+
+        const filePath =
+            getDataFilePath("servers.json");
+
+        try {
+
+            const servers = JSON.parse(
+                fs.readFileSync(filePath, "utf8")
+            );
+
+            const updatedServers =
+                servers.filter(
+                    server =>
+                        String(server.id) !==
+                        String(serverId)
+                );
+
+            fs.writeFileSync(
+                filePath,
+                JSON.stringify(
+                    updatedServers,
+                    null,
+                    4
+                )
+            );
+
+            return {
+                success: true
+            };
+
+        } catch (error) {
+
+            return {
+                success: false,
+                error: error.message
+            };
+
+        }
+
+    }
+);
+
 // Get Server
 ipcMain.handle("get-servers", async () => {
 

@@ -20,7 +20,7 @@ window.addEventListener("load", () => {
 
 });
 // Load page
-async function loadPage(page) {
+async function loadPage(page, data=null) {
 
     // Cada navegação recebe um ID novo
     const currentNavigation = ++navigationId;
@@ -113,7 +113,7 @@ async function loadPage(page) {
                 break;
 
             case "servers/add_server.html":
-                initAddServer();
+                initAddServer(data || null);
                 break;
 
             case "servers/manage_groups.html":
@@ -575,7 +575,7 @@ function initRdp() {
 
 }
 
-//List Servers
+//List server cards
 function createServerCard(server) {
 
     const card = document.createElement("div");
@@ -656,6 +656,7 @@ function createServerCard(server) {
     `;
 
     const pingButton = card.querySelector(".ping-btn");
+    const editButton = card.querySelector(".edit-btn");
 
     pingButton?.addEventListener("click", event => {
 
@@ -671,10 +672,55 @@ function createServerCard(server) {
 
     });
 
+    editButton?.addEventListener("click", event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        sessionStorage.setItem(
+            "serverToEdit",
+            JSON.stringify(server)
+        );
+
+        loadPage("servers/add_server.html",server);
+
+    });
+
     return card;
 }
 
-//Load Groups and navigate Server page
+function bindServerRdpButtons() {
+
+    const buttons =
+        document.querySelectorAll(".rdp-btn");
+
+    buttons.forEach((button) => {
+
+        button.addEventListener("click", async () => {
+
+            const ip =
+                button.dataset.ip;
+
+            try {
+
+                await window.api.openRdp(ip);
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao abrir RDP:",
+                    error
+                );
+
+            }
+
+        });
+
+    });
+
+}
+
+//Load Servers
 async function initServers() {
 
     bindNavigation();
@@ -755,6 +801,8 @@ async function initServers() {
     initGroupToggleButtons();
 
     startServerStatusMonitoring();
+
+    bindServerRdpButtons();
 }
 
 //Logic Open and close groups
@@ -880,79 +928,192 @@ function initGroupToggleButtons() {
 }
 
 //Save Json
-function initAddServer() {
+function initAddServer(server = null) {
 
-    const cancelButton = document.querySelector(
-        "#cancel-server-btn"
-    );
+    const deleteButton = document.getElementById("delete-server");
 
-    cancelButton?.addEventListener("click", () => {
+     bindNavigation();
 
-        loadPage("servers.html");
+    const nameInput =
+        document.getElementById("server-name");
 
-    });
+    const ipInput =
+        document.getElementById("server-ip");
 
+    const descriptionInput =
+        document.getElementById("server-description");
 
-    const saveButton = document.querySelector("#save-server");
+    const osInput =
+        document.getElementById("server-os");
 
-    if (!saveButton) {
+    const saveButton =
+        document.getElementById("save-server");
 
-        console.error("Save Server button not found.");
+    const pageTitle =
+        document.querySelector(".page-header h1");
+
+    if (
+        !nameInput ||
+        !ipInput ||
+        !descriptionInput ||
+        !osInput ||
+        !saveButton
+    ) {
+        console.error(
+            "Elementos do formulário não encontrados."
+        );
 
         return;
+    }
+
+    const isEditing = server !== null;
+
+    if (isEditing) {
+
+        if (pageTitle) {
+            pageTitle.textContent = "Edit Server";
+        }
+
+        if (deleteButton) {
+            deleteButton.hidden = false;
+        }
+
+        saveButton.textContent = "Save Changes";
+
+        nameInput.value = server.name || "";
+        ipInput.value = server.ip || "";
+        descriptionInput.value =
+            server.description || "";
+        osInput.value = server.os || "";
 
     }
 
+    if (isEditing && deleteButton) {
 
-    saveButton.addEventListener("click", async () => {
+        deleteButton.addEventListener(
+            "click",
+            async () => {
 
-        const name = document
-            .querySelector("#server-name")
-            .value
-            .trim();
+                const confirmed = confirm(
+                    `Delete "${server.name}"?`
+                );
 
-        const ip = document
-            .querySelector("#server-ip")
-            .value
-            .trim();
+                if (!confirmed) {
+                    return;
+                }
 
-        const description = document
-            .querySelector("#server-description")
-            .value
-            .trim();
+                try {
 
-        const os = document.querySelector("#server-os").value;
+                    deleteButton.disabled = true;
+                    saveButton.disabled = true;
 
+                    const result =
+                        await window.api.deleteServer(
+                            server.id
+                        );
 
-        if (!name || !ip) {
+                    if (result?.success === false) {
 
-            console.error("Name and IP are required.");
+                        throw new Error(
+                            result.error
+                        );
 
-            return;
+                    }
+
+                    loadPage("servers.html");
+
+                } catch (error) {
+
+                    console.error(
+                        "Erro ao eliminar servidor:",
+                        error
+                    );
+
+                    deleteButton.disabled = false;
+                    saveButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+    saveButton.addEventListener(
+    "click",
+        async event => {
+
+            event.preventDefault();
+
+            const serverData = {
+
+                name: nameInput.value.trim(),
+
+                ip: ipInput.value.trim(),
+
+                description:
+                    descriptionInput.value.trim(),
+
+                os: osInput.value
+
+            };
+
+            if (!serverData.name || !serverData.ip) {
+
+                console.error(
+                    "Name e IP são obrigatórios."
+                );
+
+                return;
+
+            }
+
+            try {
+
+                saveButton.disabled = true;
+
+                let result;
+
+                if (isEditing) {
+
+                    result =
+                        await window.api.updateServer(
+                            server.id,
+                            serverData
+                        );
+
+                } else {
+
+                    result =
+                        await window.api.saveServer(
+                            serverData
+                        );
+
+                }
+
+                if (result?.success === false) {
+
+                    throw new Error(
+                        result.error
+                    );
+
+                }
+
+                loadPage("servers.html");
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao guardar servidor:",
+                    error
+                );
+
+                saveButton.disabled = false;
+
+            }
 
         }
-
-
-        const server = {
-            name,
-            ip,
-            description,
-            os
-        };
-
-        const result = await window.api.saveServer(server);
-
-        if (result.success) {
-
-            loadPage("servers.html");
-
-        } else {
-
-            console.error(result.error);
-
-        }
-
-    });
+    );
 
 }
 

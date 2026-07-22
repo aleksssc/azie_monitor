@@ -28,6 +28,12 @@ contextBridge.exposeInMainWorld("api", {
 
     // Server
     saveServer: (server) => ipcRenderer.invoke("save-server", server),
+
+    // Update
+    updateServer: (serverId, serverData) => ipcRenderer.invoke("update-server",serverId,serverData),
+
+    //Delete
+    deleteServer: serverId => ipcRenderer.invoke("delete-server", serverId),
     
     //Load
     getServers: () => ipcRenderer.invoke("get-servers"),
