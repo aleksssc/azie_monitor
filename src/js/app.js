@@ -940,13 +940,7 @@ function initAddServer() {
             os
         };
 
-
-        console.log("A enviar servidor:", server);
-
         const result = await window.api.saveServer(server);
-
-        console.log("Resposta do main:", result);
-
 
         if (result.success) {
 
