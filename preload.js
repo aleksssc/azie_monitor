@@ -1,0 +1,38 @@
+const { contextBridge, ipcRenderer } = require("electron");
+
+contextBridge.exposeInMainWorld("api", {
+
+    // Menu
+    loadPage: (page) => ipcRenderer.invoke("load-page", page),
+
+    // Tools
+    runTool: (tool) => ipcRenderer.invoke("run-tool", tool),
+
+    // Ping
+    ping: (target, count = 4) => ipcRenderer.invoke("ping", target, count),
+
+    //TraceRoute
+    traceroute: (target) => ipcRenderer.invoke("traceroute", target),
+
+    //DnsLookup
+    dnsLookup: (target) => ipcRenderer.invoke("dns-lookup", target),
+
+    //WhoIs
+    whois: (target) => ipcRenderer.invoke("whois", target),
+
+    //Port
+    portScan: (target, startPort, endPort) => ipcRenderer.invoke("port-scan",target,startPort,endPort),
+
+    //RDP
+    openRdp: (target) => ipcRenderer.invoke("open-rdp", target),
+
+    // Server
+    saveServer: (server) => ipcRenderer.invoke("save-server", server),
+    
+    //Load
+    getServers: () => ipcRenderer.invoke("get-servers"),
+
+    // Test
+    checkOnline: (target) => ipcRenderer.invoke("check-online", target),
+
+});
