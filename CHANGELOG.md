@@ -7,19 +7,17 @@ All notable changes to this project will be documented in this file.
 ## [1.1.0] - 2026-07-22
 
 ### ✨ Added
-- Edit and Delete Server.
-- Add, edit, manage Server Groups.
-- Ping Tool.
-- Remote Desktop (RDP).
-- Settings page.
-- About page.
+- Server editing and deletion.
+- Add, edit and manage Server Groups.
+- Ping shortcut for each server.
+- Remote Desktop (RDP) shortcut for each server.
 
 ### 🚀 Improved
 - Dynamic application version.
 - Faster server status refresh.
-- Better navigation.
+- Improved navigation.
 
 ### 🐞 Fixed
 - Fixed page loading conflicts.
 - Fixed server status refresh.
-- Fixed RDP event binding.
+- Fixed server page rendering.
