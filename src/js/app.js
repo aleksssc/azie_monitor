@@ -2,6 +2,47 @@ let serverStatusInterval = null;
 let serverStatusChecking = false;
 let navigationId = 0;
 
+function initWindowControls() {
+
+    const minimizeButton =
+        document.getElementById("window-minimize");
+
+    const maximizeButton =
+        document.getElementById("window-maximize");
+
+    const closeButton =
+        document.getElementById("window-close");
+
+
+    minimizeButton?.addEventListener("click", () => {
+
+        window.api.minimizeWindow();
+
+    });
+
+
+    maximizeButton?.addEventListener("click", () => {
+
+        window.api.maximizeWindow();
+
+    });
+
+
+    closeButton?.addEventListener("click", () => {
+
+        window.api.closeWindow();
+
+    });
+
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    initWindowControls();
+
+});
+
 window.addEventListener("load", () => {
 
     setTimeout(() => {
@@ -586,10 +627,6 @@ function renderHomeDashboard(servers) {
         offlineServers
     );
 
-    renderDashboardGroups(
-        groups
-    );
-
 }
 
 function updateDashboardHealthChart(
@@ -893,113 +930,6 @@ function createDashboardGroups(servers) {
         );
 
     });
-
-}
-
-function renderDashboardGroups(groups) {
-
-    const container =
-        document.getElementById(
-            "dashboard-groups-list"
-        );
-
-
-    if (!container) {
-
-        return;
-    }
-
-
-    if (groups.length === 0) {
-
-        container.innerHTML = `
-
-            <div class="dashboard-empty-state">
-
-                <i class="fa-solid fa-layer-group"></i>
-
-                <span>
-                    No server groups configured.
-                </span>
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        groups.map(group => {
-
-            const percentage =
-                group.total > 0
-                    ? Math.round(
-                        group.online /
-                        group.total *
-                        100
-                    )
-                    : 0;
-
-
-            return `
-
-                <article class="dashboard-group-card">
-
-                    <div class="dashboard-group-header">
-
-                        <div class="dashboard-group-title">
-
-                            <i class="fa-solid fa-folder"></i>
-
-                            <strong>
-                                ${escapeDashboardHtml(group.name)}
-                            </strong>
-
-                        </div>
-
-                        <span class="dashboard-group-count">
-
-                            ${group.total}
-                            ${
-                                group.total === 1
-                                    ? "server"
-                                    : "servers"
-                            }
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="dashboard-group-progress">
-
-                        <div
-                            class="dashboard-group-progress-bar"
-                            style="width: ${percentage}%"
-                        ></div>
-
-                    </div>
-
-
-                    <div class="dashboard-group-footer">
-
-                        <span>
-                            ${group.online} online
-                        </span>
-
-                        <strong>
-                            ${percentage}%
-                        </strong>
-
-                    </div>
-
-                </article>
-
-            `;
-
-        }).join("");
 
 }
 

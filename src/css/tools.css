@@ -1,6 +1,10 @@
+/* ================================================= */
+/* SEARCH */
+/* ================================================= */
+
 .search-box{
 
-    margin-bottom:30px;
+    margin-bottom:24px;
 }
 
 .search-box input{
@@ -9,90 +13,228 @@
 
     max-width:450px;
 
-    background:#1d2025;
+    min-height:42px;
 
-    border:1px solid #2d3138;
+    padding:0 14px;
 
-    border-radius:12px;
+    color:var(--text);
 
-    padding:14px 18px;
+    background:#111c2e;
 
-    color:white;
+    border:1px solid #263449;
+
+    border-radius:9px;
 
     outline:none;
 
-    transition:.25s;
+    font-size:13px;
+
+    transition:
+        background-color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.search-box input::placeholder{
+
+    color:#64748b;
+}
+
+.search-box input:hover{
+
+    border-color:#334155;
 }
 
 .search-box input:focus{
 
-    border-color:#3b82f6;
+    background:#142238;
+
+    border-color:var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(59,130,246,.1);
 }
+
+
+/* ================================================= */
+/* TOOLS GRID */
+/* ================================================= */
 
 .tools-grid{
 
     display:grid;
 
-    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    grid-template-columns:
+        repeat(auto-fill,minmax(220px,1fr));
 
-    gap:20px;
+    gap:14px;
+
+    width:100%;
 }
+
+
+/* ================================================= */
+/* TOOL CARD */
+/* ================================================= */
 
 .tool-card{
 
     appearance:none;
 
-    width:100%;
-
-    text-align:left;
-
-    background:#1d2025;
-
-    border:1px solid #2d3138;
-
-    border-radius:16px;
-
-    padding:24px;
-
-    color:white;
-
-    cursor:pointer;
-
-    transition:.25s;
-
     display:flex;
 
     flex-direction:column;
 
-    gap:12px;
+    gap:10px;
+
+    width:100%;
+
+    min-height:175px;
+
+    padding:20px;
+
+    color:var(--text);
+
+    background:#111c2e;
+
+    border:1px solid #263449;
+
+    border-radius:11px;
+
+    outline:none;
 
     font:inherit;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    transition:
+        background-color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
 }
 
 .tool-card:hover{
 
-    transform:translateY(-6px);
+    background:#142238;
 
-    border-color:#3b82f6;
+    border-color:var(--primary);
 
-    background:#23272d;
+    box-shadow:
+        0 12px 25px rgba(0,0,0,.16);
+
+    transform:translateY(-3px);
 }
+
+.tool-card:active{
+
+    transform:translateY(-1px);
+}
+
+.tool-card:focus-visible{
+
+    border-color:var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(59,130,246,.15);
+}
+
+
+/* ================================================= */
+/* TOOL ICON */
+/* ================================================= */
 
 .tool-icon{
 
-    font-size:34px;
+    display:flex;
 
-    margin-bottom:18px;
+    align-items:center;
+
+    justify-content:center;
+
+    flex-shrink:0;
+
+    width:42px;
+
+    height:42px;
+
+    margin-bottom:8px;
+
+    color:#60a5fa;
+
+    background:rgba(59,130,246,.13);
+
+    border-radius:9px;
+
+    font-size:20px;
 }
+
+.tool-icon i{
+
+    font-size:18px;
+}
+
+
+/* ================================================= */
+/* TOOL CONTENT */
+/* ================================================= */
 
 .tool-card h3{
 
-    margin-bottom:10px;
+    margin:0;
+
+    color:#f8fafc;
+
+    font-size:15px;
+
+    font-weight:650;
+
+    line-height:1.3;
 }
 
 .tool-card p{
 
-    color:#9ca3af;
+    margin:0;
+
+    margin-top:auto;
+
+    color:#8090a6;
+
+    font-size:12px;
 
     line-height:1.5;
+}
+
+
+/* ================================================= */
+/* RESPONSIVE */
+/* ================================================= */
+
+@media(max-width:900px){
+
+    .tools-grid{
+
+        grid-template-columns:
+            repeat(auto-fill,minmax(200px,1fr));
+    }
+}
+
+@media(max-width:600px){
+
+    .search-box input{
+
+        max-width:none;
+    }
+
+    .tools-grid{
+
+        grid-template-columns:1fr;
+    }
+
+    .tool-card{
+
+        min-height:150px;
+    }
 }

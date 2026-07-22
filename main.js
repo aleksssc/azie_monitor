@@ -15,6 +15,41 @@ app.whenReady().then(() => {
 
 });
 
+ipcMain.on("window-minimize", (event) => {
+
+    const window =
+        BrowserWindow.fromWebContents(event.sender);
+
+    window?.minimize();
+
+});
+
+ipcMain.on("window-maximize", (event) => {
+
+    const window =
+        BrowserWindow.fromWebContents(event.sender);
+
+    if (!window) {
+        return;
+    }
+
+    if (window.isMaximized()) {
+        window.unmaximize();
+    } else {
+        window.maximize();
+    }
+
+});
+
+ipcMain.on("window-close", (event) => {
+
+    const window =
+        BrowserWindow.fromWebContents(event.sender);
+
+    window?.close();
+
+});
+
 ipcMain.handle("get-app-version", () => {
 
     return packageJson.version;
@@ -33,6 +68,7 @@ function createWindow() {
         icon: path.join(__dirname, "assets", "img", "logo.ico"),
 
         autoHideMenuBar: true,
+        frame: false,
         backgroundColor: "#111111",
 
         webPreferences: {
@@ -47,7 +83,7 @@ function createWindow() {
 
     win.loadFile(path.join(__dirname, "src", "views", "index.html"));
 
-    //win.webContents.openDevTools();
+    win.webContents.openDevTools();
 
 }
 

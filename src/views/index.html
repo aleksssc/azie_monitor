@@ -20,6 +20,60 @@
 
 <body>
 
+<header class="topbar">
+
+    <div class="topbar-brand">
+
+        <img
+            class="topbar-logo"
+            src="../../assets/img/logo.png"
+            alt="Azie Monitor"
+        >
+
+        <span class="topbar-name">
+            AZIE MONITOR
+        </span>
+
+    </div>
+
+
+    <div class="topbar-window-controls">
+
+        <button
+            id="window-minimize"
+            class="topbar-window-button"
+            type="button"
+            title="Minimize"
+            aria-label="Minimize"
+        >
+            <span class="minimize-icon"></span>
+        </button>
+
+
+        <button
+            id="window-maximize"
+            class="topbar-window-button"
+            type="button"
+            title="Maximize"
+            aria-label="Maximize"
+        >
+            <span class="maximize-icon"></span>
+        </button>
+
+
+        <button
+            id="window-close"
+            class="topbar-window-button topbar-close-button"
+            type="button"
+            title="Close"
+            aria-label="Close"
+        >
+            <span class="close-icon"></span>
+        </button>
+
+    </div>
+
+</header>
 
 <div id="splash-screen">
 
@@ -35,54 +89,54 @@
 </div>
 
 
+    <div class="app-container">
 
-<div id="app">
-
-
-    <div id="menu" class="sidebar">
-
-        <h2>AZIE MONITOR</h2>
+        <div id="app">
 
 
-        <button class="menu-btn" data-page="home.html">
-            <i class="fa-solid fa-house"></i>
-            Home
-        </button>
+            <div id="menu" class="sidebar">
+
+                <h2>AZIE MONITOR</h2>
 
 
-        <button class="menu-btn" data-page="tools.html">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
-            Tools
-        </button>
+                <button class="menu-btn" data-page="home.html">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </button>
 
 
-        <button class="menu-btn" data-page="servers.html">
-            <i class="fa-solid fa-server"></i>
-            Servers
-        </button>
+                <button class="menu-btn" data-page="tools.html">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    Tools
+                </button>
 
 
-        <button class="menu-btn" data-page="settings.html">
-            <i class="fa-solid fa-gear"></i>
-            Settings
-        </button>
+                <button class="menu-btn" data-page="servers.html">
+                    <i class="fa-solid fa-server"></i>
+                    Servers
+                </button>
 
 
-        <button class="menu-btn" data-page="about.html">
-            <i class="fa-solid fa-file-lines"></i>
-            About
-        </button>
+                <button class="menu-btn" data-page="settings.html">
+                    <i class="fa-solid fa-gear"></i>
+                    Settings
+                </button>
+
+
+                <button class="menu-btn" data-page="about.html">
+                    <i class="fa-solid fa-file-lines"></i>
+                    About
+                </button>
+
+            </div>
+
+        <div class="content">
+
+            <div id="page-content"></div>
+
+        </div>
 
     </div>
-
-
-
-<div class="content">
-
-    <div id="page-content"></div>
-
-</div>
-
 </div>
 
 <script src="../js/app.js"></script>
